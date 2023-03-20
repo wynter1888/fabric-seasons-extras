@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "seasonsextras",
+  "version": "${version}",
+  "name": "Fabric Seasons: Extras",
+  "description": "Custom blocks and items to make your Fabric Seasons experience better.",
+  "authors": [
+    "D4rkness_King"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/fabric-seasons-extras",
+    "sources": "https://github.com/lucaargolo/fabric-seasons-extras",
+    "issues": "https://github.com/lucaargolo/fabric-seasons-extras/issues"
+  },
+  "license": "Mozilla Public License 2.0",
+  "icon": "assets/seasonsextras/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.lucaargolo.seasonsextras.FabricSeasonsExtras"
+    ],
+    "client": [
+      "io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient"
+    ]
+  },
+  "accessWidener": "seasonsextras.accesswidener",
+  "mixins": [
+    "seasonsextras.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.8",
+    "fabric": ">=0.56.1",
+    "seasons": ">=2.0-BETA",
+    "minecraft": "1.19.x"
+  }
+}
