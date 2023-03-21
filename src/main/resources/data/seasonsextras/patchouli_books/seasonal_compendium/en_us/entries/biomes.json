@@ -1,0 +1,92 @@
+{
+  "name": "Biomes",
+  "category": "seasonsextras:compendium",
+  "icon": "minecraft:oak_sapling",
+  "pages": [
+    {
+      "type": "patchouli:empty"
+    },
+    {
+      "type": "seasonsextras:biome_search",
+      "title": "Biomes"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Forest",
+      "text": "BIOME_INFO$(br2)$(2)Spring Temperature:$(0) SPRING_TEMPERATURE$(br)$(6)Summer Temperature: $(0)SUMMER_TEMPERATURE$(br)$(c)Fall Temperature: $(0)FALL_TEMPERATURE$(br)$(3)Winter Temperature: $(0)WINTER_TEMPERATURE$(br2)RAIN_INFO$(br2)SNOW_INFO"
+    },
+    {
+      "type": "seasonsextras:biome_multiblock",
+      "name": "Colors",
+      "multiblock": {
+        "mapping": {
+          "0": "minecraft:oak_log[axis=y]",
+          "W": "minecraft:oak_log[axis=y]",
+          "L": "minecraft:oak_leaves",
+          "B": "minecraft:grass_block",
+          "G": "minecraft:grass"
+        },
+        "pattern": [
+          [
+            "     ",
+            "  L  ",
+            " LLL ",
+            "  L  ",
+            "     "
+          ],
+          [
+            "     ",
+            "  L  ",
+            " LWL ",
+            "  L  ",
+            "     "
+          ],
+          [
+            " LLLL",
+            "LLLLL",
+            "LLWLL",
+            "LLLLL",
+            "LLLLL"
+          ],
+          [
+            " LLL ",
+            "LLLLL",
+            "LLWLL",
+            "LLLLL",
+            "LLLLL"
+          ],
+          [
+            "     ",
+            "     ",
+            "  0  ",
+            "     ",
+            "     "
+          ],
+          [
+            "     ",
+            "     ",
+            "  W  ",
+            "     ",
+            "     "
+          ],
+          [
+            "     ",
+            "  G  ",
+            " GWG ",
+            "   G ",
+            "     "
+          ],
+          [
+            "     ",
+            " BBB ",
+            " BBB ",
+            " BBB ",
+            "     "
+          ]
+        ]
+      },
+      "enable_visualize": false
+    }
+  ],
+  "read_by_default": true
+}

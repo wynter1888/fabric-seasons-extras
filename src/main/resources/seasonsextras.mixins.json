@@ -4,8 +4,16 @@
   "package": "io.github.lucaargolo.seasonsextras.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "BookContentsBuilderMixin",
+    "GuiBookEntryMixin",
+    "ReloadContentsHandlerMixin"
   ],
   "client": [
+    "AbstractMultiblockMixin",
+    "FabricSeasonsMixin",
+    "GuiBookAccessor",
+    "GuiBookEntryAccessor",
+    "MouseMixin"
   ],
   "injectors": {
     "defaultRequire": 1

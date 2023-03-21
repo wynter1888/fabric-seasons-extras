@@ -1,0 +1,9 @@
+{
+  "name": "Seasonal Compendium",
+  "landing_text": "Hello World",
+  "dont_generate_book": true,
+  "custom_book_item": "seasonsextras:seasonal_compendium",
+  "show_progress": false,
+  "pamphlet": true,
+  "text_overflow_mode": "truncate"
+}
