@@ -16,15 +16,15 @@
       "text": "BIOME_INFO$(br2)$(2)Spring Temperature:$(0) SPRING_TEMPERATURE$(br)$(6)Summer Temperature: $(0)SUMMER_TEMPERATURE$(br)$(c)Fall Temperature: $(0)FALL_TEMPERATURE$(br)$(3)Winter Temperature: $(0)WINTER_TEMPERATURE$(br2)RAIN_INFO$(br2)SNOW_INFO"
     },
     {
-      "type": "seasonsextras:biome_multiblock",
+      "type": "seasonsextras:seasonal_biome",
       "name": "Colors",
       "multiblock": {
         "mapping": {
-          "0": "minecraft:oak_log[axis=y]",
-          "W": "minecraft:oak_log[axis=y]",
-          "L": "minecraft:oak_leaves",
-          "B": "minecraft:grass_block",
-          "G": "minecraft:grass"
+          "0": "minecraft:diamond_block",
+          "W": "minecraft:diamond_block",
+          "L": "minecraft:gold_block",
+          "B": "minecraft:iron_block",
+          "G": "minecraft:light_weighted_pressure_plate"
         },
         "pattern": [
           [
@@ -85,7 +85,7 @@
           ]
         ]
       },
-      "enable_visualize": false
+      "enable_visualize": true
     }
   ],
   "read_by_default": true

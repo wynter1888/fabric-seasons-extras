@@ -17,6 +17,7 @@ import net.minecraft.tag.BiomeTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
@@ -149,6 +150,19 @@ public class BookContentsBuilderMixin {
                     pages.add(biomeFirstPage);
                     JsonObject biomeSecondPage = secondPage.deepCopy();
                     biomeSecondPage.add("biome_id", new JsonPrimitive(biomeId.toString()));
+
+                    //TODO: Move global variables to client
+                    if(FabricSeasonsExtras.biomeToTrees.containsKey(biomeId)) {
+                        JsonArray multiblocks = new JsonArray();
+                        FabricSeasonsExtras.biomeToTrees.get(biomeId).forEach(treeId -> {
+                            JsonObject multiblock = FabricSeasonsExtras.treeToMultiblock.get(treeId);
+                            if (multiblock != null) {
+                                multiblocks.add(multiblock);
+                            }
+                        });
+                        biomeSecondPage.add("multiblocks", multiblocks);
+                    }
+
                     pages.add(biomeSecondPage);
                 });
             });

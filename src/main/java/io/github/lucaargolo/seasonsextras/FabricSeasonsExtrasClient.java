@@ -1,10 +1,9 @@
 package io.github.lucaargolo.seasonsextras;
 
 import io.github.lucaargolo.seasons.utils.Season;
-import io.github.lucaargolo.seasonsextras.mixin.GuiBookAccessor;
 import io.github.lucaargolo.seasonsextras.mixin.GuiBookEntryAccessor;
 import io.github.lucaargolo.seasonsextras.patchouli.PageBiomeSearch;
-import io.github.lucaargolo.seasonsextras.patchouli.PageSeasonalBiomeMultiblock;
+import io.github.lucaargolo.seasonsextras.patchouli.PageSeasonalBiome;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -32,17 +31,24 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientBookRegistry.INSTANCE.pageTypes.put(new ModIdentifier("biome_search"), PageBiomeSearch.class);
-        ClientBookRegistry.INSTANCE.pageTypes.put(new ModIdentifier("biome_multiblock"), PageSeasonalBiomeMultiblock.class);
+        ClientBookRegistry.INSTANCE.pageTypes.put(new ModIdentifier("seasonal_biome"), PageSeasonalBiome.class);
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if(client.currentScreen == null) {
                 FabricSeasonsExtrasClient.multiblockBiomeOverride = null;
                 FabricSeasonsExtrasClient.multiblockSeasonOverride = null;
             }else{
                 if(client.currentScreen instanceof GuiBookEntryAccessor bookEntry) {
+                    //TODO: Make TickablePage
                     if(bookEntry.getLeftPage() instanceof PageBiomeSearch page) {
                         page.tick();
                     }
                     if(bookEntry.getRightPage() instanceof PageBiomeSearch page) {
+                        page.tick();
+                    }
+                    if(bookEntry.getLeftPage() instanceof PageSeasonalBiome page) {
+                        page.tick();
+                    }
+                    if(bookEntry.getRightPage() instanceof PageSeasonalBiome page) {
                         page.tick();
                     }
                 }

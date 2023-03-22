@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
+import io.github.lucaargolo.seasonsextras.mixin.PageMultiblockAccessor;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
@@ -14,19 +15,52 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
-import vazkii.patchouli.client.book.gui.GuiBook;
+import vazkii.patchouli.client.book.BookContentsBuilder;
+import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.page.PageMultiblock;
+import vazkii.patchouli.common.multiblock.AbstractMultiblock;
+import vazkii.patchouli.common.multiblock.SerializedMultiblock;
 
-public class PageSeasonalBiomeMultiblock extends PageMultiblock  {
+import java.util.ArrayList;
+import java.util.List;
+
+public class PageSeasonalBiome extends PageMultiblock  {
 
     private static final Identifier PATCHOULI_EXTRAS = new ModIdentifier("textures/gui/patchouli_extras.png");
 
     @SerializedName("biome_id") Identifier biomeId;
+    @SerializedName("multiblocks") SerializedMultiblock[] serializedMultiblocks;
+
+    private final transient List<AbstractMultiblock> multiblockObjs = new ArrayList<>();
 
     private transient Season selectedSeason = Season.SPRING;
+    private transient int age = 0;
+    private transient int index = 0;
+
+
+    @Override
+    public void build(BookEntry entry, BookContentsBuilder builder, int pageNum) {
+        PageMultiblockAccessor accessor = (PageMultiblockAccessor) this;
+        if(serializedMultiblocks != null && serializedMultiblocks.length > 0) {
+            accessor.setSerializedMultiblock(serializedMultiblocks[0]);
+            for (SerializedMultiblock serializedMultiblock : serializedMultiblocks) {
+                multiblockObjs.add(serializedMultiblock.toMultiblock());
+            }
+        }
+        super.build(entry, builder, pageNum);
+    }
 
     @Override
     public void render(MatrixStack ms, int mouseX, int mouseY, float pticks) {
+        if(serializedMultiblocks != null) {
+            PageMultiblockAccessor accessor = (PageMultiblockAccessor) this;
+            int newIndex = (age/40) % serializedMultiblocks.length;
+            if(newIndex != index) {
+                index = newIndex;
+                accessor.setMultiblockObj(multiblockObjs.get(index));
+            }
+        }
+
         FabricSeasonsExtrasClient.multiblockSeasonOverride = selectedSeason;
         if(biomeId != null) {
             FabricSeasonsExtrasClient.multiblockBiomeOverride = RegistryKey.of(Registry.BIOME_KEY, biomeId);
@@ -76,4 +110,10 @@ public class PageSeasonalBiomeMultiblock extends PageMultiblock  {
             return true;
         }else return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
+
+    public void tick() {
+        age++;
+    }
+
+
 }
