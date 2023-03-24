@@ -4,26 +4,23 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.DynamicRegistryManager;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.World;
 import vazkii.patchouli.client.book.gui.BookTextRenderer;
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.client.book.gui.GuiBookEntry;
 import vazkii.patchouli.client.book.page.PageText;
-import vazkii.patchouli.client.book.text.Span;
-import vazkii.patchouli.client.book.text.TextLayouter;
-import vazkii.patchouli.common.base.PatchouliConfig;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -64,13 +61,18 @@ public class PageBiomeSearch extends PageText {
     public void onDisplayed(GuiBookEntry parent, int left, int top) {
         super.onDisplayed(parent, left, top);
         biomes.clear();
-        FabricSeasonsExtrasClient.validBiomes.forEach(entry -> {
-            entry.getKey().ifPresent(key -> {
-                Identifier biomeId = key.getValue();
-                String biomeName = Text.translatable(biomeId.toTranslationKey("biome")).getString();
-                biomes.add(new Pair<>(biomeId, biomeName));
+        MinecraftClient client = MinecraftClient.getInstance();
+        ClientWorld world = client.world;
+        if(world != null) {
+            RegistryKey<World> worldKey = world.getRegistryKey();
+            FabricSeasonsExtrasClient.worldValidBiomes.getOrDefault(worldKey, new HashSet<>()).forEach(entry -> {
+                entry.getKey().ifPresent(key -> {
+                    Identifier biomeId = key.getValue();
+                    String biomeName = Text.translatable(biomeId.toTranslationKey("biome")).getString();
+                    biomes.add(new Pair<>(biomeId, biomeName));
+                });
             });
-        });
+        }
         textRender = new BookTextRenderer(parent, text.as(Text.class), 0, 12);
         int textSize = (int) (fontRenderer.getWidth("Search:")*0.8);
         searchBar = new TextFieldWidget(fontRenderer, parent.bookLeft+left+textSize, parent.bookTop+top+138, 105-textSize, 10, Text.literal(""));

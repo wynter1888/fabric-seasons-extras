@@ -1,9 +1,8 @@
 package io.github.lucaargolo.seasonsextras;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Either;
 import io.github.lucaargolo.seasons.FabricSeasons;
 import io.github.lucaargolo.seasonsextras.block.GreenhouseGlassBlock;
 import io.github.lucaargolo.seasonsextras.block.SeasonDetectorBlock;
@@ -12,6 +11,7 @@ import io.github.lucaargolo.seasonsextras.blockentities.SeasonDetectorBlockEntit
 import io.github.lucaargolo.seasonsextras.item.SeasonCalendarItem;
 import io.github.lucaargolo.seasonsextras.item.SeasonalCompendiumItem;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
+import io.github.lucaargolo.seasonsextras.utils.PatchouliMultiblockCreator;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -27,24 +27,21 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryEntryList;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.*;
-import net.minecraft.world.gen.feature.util.FeatureContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 public class FabricSeasonsExtras implements ModInitializer {
 
@@ -55,20 +52,12 @@ public class FabricSeasonsExtras implements ModInitializer {
     public static ModIdentifier SEASONAL_COMPENDIUM_ITEM = new ModIdentifier("seasonal_compendium");
     public static ModIdentifier SEND_VALID_BIOMES_S2C = new ModIdentifier("send_valid_biomes_s2c");
 
+    public static ModIdentifier SEND_BIOME_MULTIBLOCKS_S2C = new ModIdentifier("send_biome_multiblocks_s2c");
+    public static ModIdentifier SEND_MULTIBLOCKS_S2C = new ModIdentifier("send_multiblocks_s2c");
 
-    public static HashMap<Identifier, HashSet<Identifier>> biomeToTrees = new HashMap<>();
-    public static HashMap<Identifier, JsonObject> treeToMultiblock = new HashMap<>();
+    private static final HashMap<Identifier, JsonObject> multiblockCache = new HashMap<>();
 
-    public static HashMap<BlockPos, BlockState> testingMap = new HashMap<>();
-    public static Thread testingThread = null;
-    public static boolean testingTree = false;
 
-    private static final char[] VALID = {
-        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
-    };
 
     @Override
     public void onInitialize() {
@@ -89,121 +78,118 @@ public class FabricSeasonsExtras implements ModInitializer {
         });
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public static void sendValidBiomes(MinecraftServer server, @Nullable ServerPlayerEntity player) {
-        if(player == null) {
-            treeToMultiblock.clear();
+        boolean generateMultiblocks = player == null;
+        if(generateMultiblocks) {
+            multiblockCache.clear();
         }
-        Set<Identifier> validBiomes = new HashSet<>();
         server.getWorlds().forEach(serverWorld -> {
             if(FabricSeasons.CONFIG.isValidInDimension(serverWorld.getRegistryKey())) {
+                Set<RegistryEntry<Biome>> validBiomes = new HashSet<>();
                 serverWorld.getChunkManager().getChunkGenerator().getBiomeSource().getBiomes().forEach(entry -> {
-                    entry.getKey().ifPresent(key -> {
-                        Identifier biomeId = key.getValue();
-
-                        List<ConfiguredFeature<?, ?>> list = entry.value().getGenerationSettings().getFeatures().stream()
-                                .flatMap(RegistryEntryList::stream)
-                                .map(RegistryEntry::value)
-                                .flatMap(PlacedFeature::getDecoratedFeatures)
-                                .filter((c) -> c.feature() == Feature.TREE)
-                                .collect(ImmutableList.toImmutableList());
-
-                        list.forEach(cf -> {
-                            Identifier cfId = server.getRegistryManager().get(Registry.CONFIGURED_FEATURE_KEY).getId(cf);
-                            if(cfId != null && cf.feature() instanceof TreeFeature feature && cf.config() instanceof TreeFeatureConfig config) {
-                                if (!treeToMultiblock.containsKey(cfId)) {
-                                    FabricSeasonsExtras.testingMap.clear();
-                                    FabricSeasonsExtras.testingTree = true;
-                                    FabricSeasonsExtras.testingThread = Thread.currentThread();
-                                    try {
-                                        feature.generate(new FeatureContext<>(Optional.of(cf), serverWorld, serverWorld.getChunkManager().getChunkGenerator(), Random.create(0L), new BlockPos(100, 100, 100), config));
-                                    } catch (Exception ignored) {
-                                        FabricSeasonsExtras.testingMap.clear();
-                                    }
-                                    FabricSeasonsExtras.testingTree = false;
-
-                                    AtomicInteger index = new AtomicInteger();
-                                    HashMap<BlockState, Character> mappings = new HashMap<>();
-                                    HashMap<Integer, HashMap<Integer, HashMap<Integer, Character>>> pattern = new HashMap<>();
-
-                                    Optional<BlockBox> optional = BlockBox.encompassPositions(FabricSeasonsExtras.testingMap.keySet());
-                                    if (optional.isPresent()) {
-                                        BlockBox box = optional.get();
-                                        int xOffset = (box.getMinX() - 100 <= 0) ? -100 - (box.getMinX() - 100) : -100;
-                                        int yOffset = (box.getMinY() - 100 <= 0) ? -100 - (box.getMinY() - 100) : -100;
-                                        int zOffset = (box.getMinZ() - 100 <= 0) ? -100 - (box.getMinZ() - 100) : -100;
-
-                                        AtomicReference<BlockState> centerState = new AtomicReference<>(Blocks.AIR.getDefaultState());
-                                        BlockPos centerPos = box.getCenter().add(xOffset, yOffset, zOffset);
-
-                                        FabricSeasonsExtras.testingMap.forEach((pos, state) -> {
-                                            if (pos.add(xOffset, yOffset, zOffset).equals(centerPos)) {
-                                                centerState.set(state);
-                                            }
-                                            if (!mappings.containsKey(state) && index.getAndIncrement() < VALID.length) {
-                                                mappings.put(state, VALID[index.get() - 1]);
-                                            }
-                                            Character mapping = mappings.get(state);
-                                            if (mapping != null) {
-                                                int x = pos.getX() + xOffset;
-                                                int y = pos.getY() + yOffset;
-                                                int z = pos.getZ() + zOffset;
-                                                pattern.computeIfAbsent(y, i -> new HashMap<>()).computeIfAbsent(x, i -> new HashMap<>()).put(z, mapping);
-                                            }
-                                        });
-
-                                        String[][] realPattern = new String[box.getBlockCountY()][box.getBlockCountX()];
-                                        Random random = Random.create(1337L);
-                                        for (int i = 0; i < box.getBlockCountY(); i++) {
-                                            int y = box.getBlockCountY() - 1 - i;
-                                            for (int x = 0; x < box.getBlockCountX(); x++) {
-                                                realPattern[y][x] = "";
-                                                for (int z = 0; z < box.getBlockCountZ(); z++) {
-                                                    char d = ' ';
-                                                    if (x != 0 && x != box.getBlockCountX() - 1 && z != 0 && z != box.getBlockCountZ() - 1) {
-                                                        if (y == (box.getBlockCountY() - 1)) {
-                                                            d = '1';
-                                                        } else if (y == (box.getBlockCountY() - 2) && random.nextInt(4) == 2) {
-                                                            d = '2';
-                                                        }
-                                                    }
-                                                    if (centerPos.getX() == x && centerPos.getY() == i && centerPos.getZ() == z) {
-                                                        realPattern[y][x] += '0';
-                                                    } else {
-                                                        realPattern[y][x] += pattern.getOrDefault(i, new HashMap<>()).getOrDefault(x, new HashMap<>()).getOrDefault(z, d);
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        JsonObject multiblock = new JsonObject();
-                                        JsonObject m = new JsonObject();
-                                        mappings.forEach((s, c) -> m.addProperty(c.toString(), s.toString().replace("Block{", "").replace("}", "")));
-                                        m.addProperty("0", centerState.get().toString().replace("Block{", "").replace("}", ""));
-                                        m.addProperty("1", Blocks.GRASS_BLOCK.getDefaultState().toString().replace("Block{", "").replace("}", ""));
-                                        m.addProperty("2", Blocks.GRASS.getDefaultState().toString().replace("Block{", "").replace("}", ""));
-                                        multiblock.add("mapping", m);
-                                        multiblock.add("pattern", new Gson().toJsonTree(realPattern));
-                                        treeToMultiblock.put(cfId, multiblock);
-                                    }
-                                }
-                                biomeToTrees.computeIfAbsent(biomeId, b -> new HashSet<>()).add(cfId);
-                            }
-                        });
-
-                        validBiomes.add(biomeId);
-                    });
+                    entry.getKey().ifPresent(key -> validBiomes.add(entry));
                 });
+                PacketByteBuf buf = PacketByteBufs.create();
+                buf.writeIdentifier(serverWorld.getRegistryKey().getValue());
+                buf.writeInt(validBiomes.size());
+                validBiomes.stream().map(r -> r.getKey().get().getValue()).forEach(buf::writeIdentifier);
+                if(player != null) {
+                    ServerPlayNetworking.send(player, SEND_VALID_BIOMES_S2C, buf);
+                }else{
+                    server.getPlayerManager().getPlayerList().forEach(p -> ServerPlayNetworking.send(p, SEND_VALID_BIOMES_S2C, buf));
+                }
+                sendBiomeMultiblocks(server, player, serverWorld, validBiomes);
             }
         });
+        sendMultiblocks(server, player);
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    private static void sendBiomeMultiblocks(MinecraftServer server, @Nullable ServerPlayerEntity player, ServerWorld serverWorld, Set<RegistryEntry<Biome>> validBiomes) {
+        Identifier worldId = serverWorld.getRegistryKey().getValue();
+        HashMap<Identifier, HashSet<Identifier>> biomeToMultiblocks = new HashMap<>();
+        validBiomes.forEach(entry -> {
+            Identifier biomeId = entry.getKey().get().getValue();
+            List<ConfiguredFeature<?, ?>> validFeatures = entry.value().getGenerationSettings().getFeatures().stream()
+                    .flatMap(RegistryEntryList::stream)
+                    .map(RegistryEntry::value)
+                    .flatMap(PlacedFeature::getDecoratedFeatures)
+                    .filter((c) -> c.feature() instanceof TreeFeature)
+                    .collect(ImmutableList.toImmutableList());
+
+            for(ConfiguredFeature<?, ?> cf : validFeatures) {
+                Identifier cfId = server.getRegistryManager().get(Registry.CONFIGURED_FEATURE_KEY).getId(cf);
+                if(cfId != null) {
+                    if (!multiblockCache.containsKey(cfId)) {
+                        PatchouliMultiblockCreator creator = new PatchouliMultiblockCreator(Blocks.GRASS_BLOCK.getDefaultState(), Blocks.GRASS.getDefaultState(), new BlockPos(-100, -100, -100), () -> {
+                            cf.generate(serverWorld, serverWorld.getChunkManager().getChunkGenerator(), Random.create(0L), new BlockPos(100, 100, 100));
+                        });
+                        Optional<JsonObject> optional = creator.getMultiblock((set) -> {
+                            boolean foundLeave = false;
+                            boolean foundLog = false;
+                            Iterator<BlockState> iterator = set.iterator();
+                            while(iterator.hasNext() && (!foundLeave || !foundLog)) {
+                                BlockState state = iterator.next();
+                                if(state.isIn(BlockTags.LEAVES)) {
+                                    foundLeave = true;
+                                }
+                                if(state.isIn(BlockTags.LOGS)) {
+                                    foundLog = true;
+                                }
+                            }
+                            return foundLeave && foundLog;
+                        });
+                        optional.ifPresent((o) -> {
+                            multiblockCache.put(cfId, o);
+                            biomeToMultiblocks.computeIfAbsent(biomeId, b -> new HashSet<>()).add(cfId);
+                        });
+                    }else{
+                        biomeToMultiblocks.computeIfAbsent(biomeId, b -> new HashSet<>()).add(cfId);
+                    }
+                }
+            };
+            Identifier empty = new ModIdentifier("empty");
+            if(multiblockCache.containsKey(empty)) {
+                biomeToMultiblocks.computeIfAbsent(biomeId, b -> new HashSet<>(Collections.singleton(empty)));
+            }else{
+                PatchouliMultiblockCreator creator = new PatchouliMultiblockCreator(Blocks.SAND.getDefaultState(), Blocks.DEAD_BUSH.getDefaultState(), new BlockPos(0, 0, 0), () -> {});
+                JsonObject emptyMultiblock = creator.getMultiblock((set) -> true).get();
+                multiblockCache.put(empty, emptyMultiblock);
+                biomeToMultiblocks.computeIfAbsent(biomeId, b -> new HashSet<>(Collections.singleton(empty)));
+            }
+        });
+
         PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeInt(validBiomes.size());
-        validBiomes.forEach(buf::writeIdentifier);
+        buf.writeIdentifier(worldId);
+        buf.writeInt(biomeToMultiblocks.size());
+        biomeToMultiblocks.forEach((identifier, set) -> {
+            buf.writeIdentifier(identifier);
+            buf.writeInt(set.size());
+            set.forEach(buf::writeIdentifier);
+        });
         if(player != null) {
-            ServerPlayNetworking.send(player, SEND_VALID_BIOMES_S2C, buf);
+            ServerPlayNetworking.send(player, SEND_BIOME_MULTIBLOCKS_S2C, buf);
         }else{
-            server.getPlayerManager().getPlayerList().forEach(p -> ServerPlayNetworking.send(p, SEND_VALID_BIOMES_S2C, buf));
+            server.getPlayerManager().getPlayerList().forEach(p -> ServerPlayNetworking.send(p, SEND_BIOME_MULTIBLOCKS_S2C, buf));
+        }
+
+    }
+
+    private static void sendMultiblocks(MinecraftServer server, @Nullable ServerPlayerEntity player) {
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeInt(multiblockCache.size());
+        multiblockCache.forEach((identifier, jsonObject) -> {
+            buf.writeIdentifier(identifier);
+            buf.writeString(jsonObject.toString());
+        });
+        if(player != null) {
+            ServerPlayNetworking.send(player, SEND_MULTIBLOCKS_S2C, buf);
+        }else{
+            server.getPlayerManager().getPlayerList().forEach(p -> ServerPlayNetworking.send(p, SEND_MULTIBLOCKS_S2C, buf));
         }
     }
+
 
     //TODO: I don't know what this is but it kind of works
     public static double minecraftToCelsius(float x) {

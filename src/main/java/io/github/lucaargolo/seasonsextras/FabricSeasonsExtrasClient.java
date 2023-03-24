@@ -1,5 +1,7 @@
 package io.github.lucaargolo.seasonsextras;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.mixin.GuiBookEntryAccessor;
 import io.github.lucaargolo.seasonsextras.patchouli.PageBiomeSearch;
@@ -14,19 +16,20 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import vazkii.patchouli.client.book.ClientBookRegistry;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class FabricSeasonsExtrasClient implements ClientModInitializer {
 
     public static RegistryKey<Biome> multiblockBiomeOverride = null;
     public static Season multiblockSeasonOverride = null;
 
-    public static List<RegistryEntry<Biome>> validBiomes = new ArrayList<>();
+    public static final HashMap<RegistryKey<World>, Set<RegistryEntry<Biome>>> worldValidBiomes = new HashMap<>();
+    public static final HashMap<RegistryKey<World>, HashMap<Identifier, Set<Identifier>>> worldBiomeMultiblocks = new HashMap<>();
+    public static HashMap<Identifier, JsonObject> multiblocks = new HashMap<>();
 
     @Override
     public void onInitializeClient() {
@@ -55,16 +58,48 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
             }
         });
         ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_VALID_BIOMES_S2C, (client, handler, buf, responseSender) -> {
-            List<Identifier> biomes = new ArrayList<>();
+            HashSet<Identifier> validBiomes = new HashSet<>();
+            Identifier worldId = buf.readIdentifier();
+            RegistryKey<World> worldKey = RegistryKey.of(Registry.WORLD_KEY, worldId);
             int size = buf.readInt();
             for(int i = 0; i < size; i++) {
-               biomes.add(buf.readIdentifier());
+               validBiomes.add(buf.readIdentifier());
             }
             client.execute(() -> {
-                validBiomes.clear();
-                biomes.stream().sorted(Comparator.comparing(Identifier::getPath)).forEach(biome -> {
-                    handler.getRegistryManager().get(Registry.BIOME_KEY).getEntry(RegistryKey.of(Registry.BIOME_KEY, biome)).ifPresent(entry -> validBiomes.add(entry));
+                worldValidBiomes.computeIfPresent(worldKey, (key, list) -> new HashSet<>());
+                validBiomes.stream().sorted(Comparator.comparing(Identifier::getPath)).forEach(biome -> {
+                    handler.getRegistryManager().get(Registry.BIOME_KEY).getEntry(RegistryKey.of(Registry.BIOME_KEY, biome)).ifPresent(entry -> {
+                        worldValidBiomes.computeIfAbsent(worldKey, (key) -> new HashSet<>()).add(entry);
+                    });
                 });
+            });
+        });
+        ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_BIOME_MULTIBLOCKS_S2C, (client, handler, buf, responseSender) -> {
+            HashMap<Identifier, Set<Identifier>> biomeMultiblocks = new HashMap<>();
+            Identifier worldId = buf.readIdentifier();
+            RegistryKey<World> worldKey = RegistryKey.of(Registry.WORLD_KEY, worldId);
+            int mapSize = buf.readInt();
+            for(int m = 0; m < mapSize; m++) {
+                HashSet<Identifier> set = new HashSet<>();
+                Identifier biomeId = buf.readIdentifier();
+                int setSize = buf.readInt();
+                for(int s = 0; s < setSize; s++) {
+                    set.add(buf.readIdentifier());
+                }
+                biomeMultiblocks.put(biomeId, set);
+            }
+            client.execute(() -> {
+                worldBiomeMultiblocks.put(worldKey, biomeMultiblocks);
+            });
+        });
+        ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_MULTIBLOCKS_S2C, (client, handler, buf, responseSender) -> {
+            HashMap<Identifier, JsonObject> serverMultiblocks = new HashMap<>();
+            int size = buf.readInt();
+            for(int m = 0; m < size; m++) {
+                serverMultiblocks.put(buf.readIdentifier(), JsonParser.parseString(buf.readString()).getAsJsonObject());
+            }
+            client.execute(() -> {
+                multiblocks = serverMultiblocks;
             });
         });
         BlockRenderLayerMap.INSTANCE.putBlock(Registry.BLOCK.get(new ModIdentifier("greenhouse_glass")), RenderLayer.getTranslucent());

@@ -1,6 +1,6 @@
 package io.github.lucaargolo.seasonsextras.mixin;
 
-import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
+import io.github.lucaargolo.seasonsextras.utils.PatchouliMultiblockCreator;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -10,18 +10,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.function.Predicate;
+import java.util.Optional;
 
 @Mixin(World.class)
 public class WorldMixin {
 
     @Inject(at = @At("HEAD"), method = "getBlockState", cancellable = true)
     public void getTestingTreePos(BlockPos pos, CallbackInfoReturnable<BlockState> cir) {
-        if(FabricSeasonsExtras.testingTree) {
-            if(FabricSeasonsExtras.testingMap.containsKey(pos)) {
-                cir.setReturnValue(FabricSeasonsExtras.testingMap.get(pos));
+        PatchouliMultiblockCreator testing = PatchouliMultiblockCreator.getTesting();
+        if(testing != null && Thread.currentThread() == testing.getThread()) {
+            Optional<BlockState> blockState = testing.getBlockState(pos);
+            if(blockState.isPresent()) {
+                cir.setReturnValue(blockState.get());
             }else if(pos.getY() == 99) {
-                cir.setReturnValue(Blocks.GRASS_BLOCK.getDefaultState());
+                cir.setReturnValue(testing.getGround());
             }else{
                 cir.setReturnValue(Blocks.AIR.getDefaultState());
             }
@@ -30,8 +32,9 @@ public class WorldMixin {
 
     @Inject(at = @At("HEAD"), method = "setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z", cancellable = true)
     public void setTestingTreePos(BlockPos pos, BlockState state, int flags, CallbackInfoReturnable<Boolean> cir) {
-        if(FabricSeasonsExtras.testingTree) {
-            FabricSeasonsExtras.testingMap.put(pos.toImmutable(), state);
+        PatchouliMultiblockCreator testing = PatchouliMultiblockCreator.getTesting();
+        if(testing != null && Thread.currentThread() == testing.getThread()) {
+            testing.setBlockState(pos, state);
             cir.setReturnValue(false);
         }
     }

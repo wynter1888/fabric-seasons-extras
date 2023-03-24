@@ -18,74 +18,7 @@
     {
       "type": "seasonsextras:seasonal_biome",
       "name": "Colors",
-      "multiblock": {
-        "mapping": {
-          "0": "minecraft:diamond_block",
-          "W": "minecraft:diamond_block",
-          "L": "minecraft:gold_block",
-          "B": "minecraft:iron_block",
-          "G": "minecraft:light_weighted_pressure_plate"
-        },
-        "pattern": [
-          [
-            "     ",
-            "  L  ",
-            " LLL ",
-            "  L  ",
-            "     "
-          ],
-          [
-            "     ",
-            "  L  ",
-            " LWL ",
-            "  L  ",
-            "     "
-          ],
-          [
-            " LLLL",
-            "LLLLL",
-            "LLWLL",
-            "LLLLL",
-            "LLLLL"
-          ],
-          [
-            " LLL ",
-            "LLLLL",
-            "LLWLL",
-            "LLLLL",
-            "LLLLL"
-          ],
-          [
-            "     ",
-            "     ",
-            "  0  ",
-            "     ",
-            "     "
-          ],
-          [
-            "     ",
-            "     ",
-            "  W  ",
-            "     ",
-            "     "
-          ],
-          [
-            "     ",
-            "  G  ",
-            " GWG ",
-            "   G ",
-            "     "
-          ],
-          [
-            "     ",
-            " BBB ",
-            " BBB ",
-            " BBB ",
-            "     "
-          ]
-        ]
-      },
-      "enable_visualize": true
+      "enable_visualize": false
     }
   ],
   "read_by_default": true
