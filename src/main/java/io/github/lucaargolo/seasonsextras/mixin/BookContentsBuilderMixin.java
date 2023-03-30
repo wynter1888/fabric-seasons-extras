@@ -38,6 +38,8 @@ public class BookContentsBuilderMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lvazkii/patchouli/client/book/BookEntry;<init>(Lcom/google/gson/JsonObject;Lnet/minecraft/util/Identifier;Lvazkii/patchouli/common/book/Book;)V"), method = "loadEntry", locals = LocalCapture.CAPTURE_FAILSOFT)
     private static void injectPagesAtLoad(Book book, BookContentLoader loader, Identifier id, Identifier file, Function<Identifier, BookCategory> categories, CallbackInfoReturnable<@Nullable BookEntry> cir, JsonElement json) {
+        //TODO make a register/event for this
+
         if(Objects.equals(id, new ModIdentifier("biomes")) && json.isJsonObject()) {
             JsonObject object = json.getAsJsonObject();
             JsonArray pages = object.getAsJsonArray("pages");

@@ -2,11 +2,12 @@ package io.github.lucaargolo.seasonsextras;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Either;
 import io.github.lucaargolo.seasons.FabricSeasons;
 import io.github.lucaargolo.seasonsextras.block.GreenhouseGlassBlock;
+import io.github.lucaargolo.seasonsextras.block.SeasonCalendarBlock;
 import io.github.lucaargolo.seasonsextras.block.SeasonDetectorBlock;
 import io.github.lucaargolo.seasonsextras.blockentities.GreenhouseGlassBlockEntity;
+import io.github.lucaargolo.seasonsextras.blockentities.SeasonCalendarBlockEntity;
 import io.github.lucaargolo.seasonsextras.blockentities.SeasonDetectorBlockEntity;
 import io.github.lucaargolo.seasonsextras.item.SeasonCalendarItem;
 import io.github.lucaargolo.seasonsextras.item.SeasonalCompendiumItem;
@@ -36,7 +37,9 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryEntryList;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.feature.*;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.world.gen.feature.PlacedFeature;
+import net.minecraft.world.gen.feature.TreeFeature;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -45,25 +48,35 @@ import java.util.*;
 
 public class FabricSeasonsExtras implements ModInitializer {
 
+    private static final HashMap<Identifier, JsonObject> multiblockCache = new HashMap<>();
     public static final String MOD_ID = "seasonsextras";
+
+    //Block Entities
     public static BlockEntityType<SeasonDetectorBlockEntity> SEASON_DETECTOR_TYPE = null;
+    public static BlockEntityType<SeasonCalendarBlockEntity> SEASON_CALENDAR_TYPE = null;
     public static BlockEntityType<GreenhouseGlassBlockEntity> GREENHOUSE_GLASS_TYPE = null;
 
-    public static ModIdentifier SEASONAL_COMPENDIUM_ITEM = new ModIdentifier("seasonal_compendium");
-    public static ModIdentifier SEND_VALID_BIOMES_S2C = new ModIdentifier("send_valid_biomes_s2c");
+    //Blocks
+    public static SeasonCalendarBlock SEASON_CALENDAR_BLOCK;
 
+    //Items
+    public static ModIdentifier SEASONAL_COMPENDIUM_ITEM_ID = new ModIdentifier("seasonal_compendium");
+    public static Item SEASON_CALENDAR_ITEM;
+
+    //Packets
+    public static ModIdentifier SEND_VALID_BIOMES_S2C = new ModIdentifier("send_valid_biomes_s2c");
     public static ModIdentifier SEND_BIOME_MULTIBLOCKS_S2C = new ModIdentifier("send_biome_multiblocks_s2c");
     public static ModIdentifier SEND_MULTIBLOCKS_S2C = new ModIdentifier("send_multiblocks_s2c");
-
-    private static final HashMap<Identifier, JsonObject> multiblockCache = new HashMap<>();
 
 
 
     @Override
     public void onInitialize() {
-        Registry.register(Registry.ITEM, SEASONAL_COMPENDIUM_ITEM, new SeasonalCompendiumItem(new Item.Settings().group(ItemGroup.TOOLS)));
+        Registry.register(Registry.ITEM, SEASONAL_COMPENDIUM_ITEM_ID, new SeasonalCompendiumItem(new Item.Settings().group(ItemGroup.TOOLS)));
 
-        Registry.register(Registry.ITEM, new ModIdentifier("season_calendar"), new SeasonCalendarItem((new Item.Settings()).group(ItemGroup.TOOLS)));
+        SEASON_CALENDAR_BLOCK = Registry.register(Registry.BLOCK, new ModIdentifier("season_calendar"), new SeasonCalendarBlock(FabricBlockSettings.copyOf(Blocks.OAK_PLANKS)));
+        SEASON_CALENDAR_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, new ModIdentifier("season_calendar"), FabricBlockEntityTypeBuilder.create(SEASON_CALENDAR_BLOCK::createBlockEntity, SEASON_CALENDAR_BLOCK).build(null));
+        SEASON_CALENDAR_ITEM = Registry.register(Registry.ITEM, new ModIdentifier("season_calendar"), new SeasonCalendarItem(SEASON_CALENDAR_BLOCK, (new Item.Settings()).group(ItemGroup.TOOLS)));
 
         SeasonDetectorBlock seasonDetector = Registry.register(Registry.BLOCK, new ModIdentifier("season_detector"), new SeasonDetectorBlock(FabricBlockSettings.copyOf(Blocks.DAYLIGHT_DETECTOR)));
         SEASON_DETECTOR_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, new ModIdentifier("season_detector"), FabricBlockEntityTypeBuilder.create(seasonDetector::createBlockEntity, seasonDetector).build(null));

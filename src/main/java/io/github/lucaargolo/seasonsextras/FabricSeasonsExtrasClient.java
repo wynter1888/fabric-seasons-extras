@@ -2,16 +2,23 @@ package io.github.lucaargolo.seasonsextras;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.github.lucaargolo.seasons.FabricSeasons;
 import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.mixin.GuiBookEntryAccessor;
 import io.github.lucaargolo.seasonsextras.patchouli.PageBiomeSearch;
 import io.github.lucaargolo.seasonsextras.patchouli.PageSeasonalBiome;
+import io.github.lucaargolo.seasonsextras.utils.CalendarTooltipRenderer;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
@@ -20,7 +27,10 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import vazkii.patchouli.client.book.ClientBookRegistry;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class FabricSeasonsExtrasClient implements ClientModInitializer {
 
@@ -102,7 +112,45 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
                 multiblocks = serverMultiblocks;
             });
         });
+        ModelPredicateProviderRegistry.register(FabricSeasonsExtras.SEASON_CALENDAR_ITEM, new Identifier("season"), (itemStack, clientWorld, livingEntity, seed) -> {
+            Entity entity = livingEntity != null ? livingEntity : itemStack.getHolder();
+            if (entity == null) {
+                return 0.0F;
+            } else {
+                if (clientWorld == null && entity.world instanceof ClientWorld) {
+                    clientWorld = (ClientWorld) entity.world;
+                }
+                if(clientWorld == null) {
+                    return 0f;
+                }else{
+                    return FabricSeasons.getCurrentSeason(clientWorld).ordinal()/4f;
+                }
+            }
+
+        });
+        ModelPredicateProviderRegistry.register(FabricSeasonsExtras.SEASON_CALENDAR_ITEM, new Identifier("progress"), (itemStack, clientWorld, livingEntity, seed) -> {
+            Entity entity = livingEntity != null ? livingEntity : itemStack.getHolder();
+            if (entity == null) {
+                return 0.0F;
+            } else {
+                if (clientWorld == null && entity.world instanceof ClientWorld) {
+                    clientWorld = (ClientWorld) entity.world;
+                }
+                if (clientWorld == null) {
+                    return 0f;
+                } else {
+                    long timeToNextSeason = (FabricSeasons.CONFIG.getSeasonLength() - (clientWorld.getTimeOfDay() - ((clientWorld.getTimeOfDay()/FabricSeasons.CONFIG.getSeasonLength())*FabricSeasons.CONFIG.getSeasonLength()) )) % FabricSeasons.CONFIG.getSeasonLength();
+                    double progressLeft = timeToNextSeason / (double) FabricSeasons.CONFIG.getSeasonLength();
+                    return (float) (1.0 - progressLeft);
+                }
+            }
+        });
         BlockRenderLayerMap.INSTANCE.putBlock(Registry.BLOCK.get(new ModIdentifier("greenhouse_glass")), RenderLayer.getTranslucent());
+        BlockRenderLayerMap.INSTANCE.putBlock(Registry.BLOCK.get(new ModIdentifier("season_calendar")), RenderLayer.getCutout());
+        HudRenderCallback.EVENT.register(((matrixStack, tickDelta) -> {
+            MinecraftClient client = MinecraftClient.getInstance();
+            CalendarTooltipRenderer.render(client, matrixStack, tickDelta);
+        }));
     }
 
 }

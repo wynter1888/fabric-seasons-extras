@@ -19,7 +19,7 @@ public class SeasonalCompendiumItem extends Item {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         if(!world.isClient()) {
-            PatchouliAPI.get().openBookGUI((ServerPlayerEntity) user, FabricSeasonsExtras.SEASONAL_COMPENDIUM_ITEM);
+            PatchouliAPI.get().openBookGUI((ServerPlayerEntity) user, FabricSeasonsExtras.SEASONAL_COMPENDIUM_ITEM_ID);
             return TypedActionResult.success(user.getStackInHand(hand));
         }
         return TypedActionResult.fail(user.getStackInHand(hand));

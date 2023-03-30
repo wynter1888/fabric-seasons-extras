@@ -2,7 +2,6 @@ package io.github.lucaargolo.seasonsextras.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Either;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockBox;
@@ -11,7 +10,6 @@ import net.minecraft.util.math.random.Random;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 public class PatchouliMultiblockCreator {
@@ -94,16 +92,16 @@ public class PatchouliMultiblockCreator {
 
         BlockState centerState = Blocks.AIR.getDefaultState();
         boolean foundCenter = false;
-        for (int i = 0; i < box.getBlockCountY()+2; i++) {
-            int y = box.getBlockCountY() + 1 - i;
+        for (int i = 0; i < box.getBlockCountY(); i++) {
+            int y = box.getBlockCountY() -1 - i;
             for (int x = 0; x < box.getBlockCountX(); x++) {
                 realPattern[y][x] = "";
                 for (int z = 0; z < box.getBlockCountZ(); z++) {
                     char d = ' ';
                     if (x != 0 && x != box.getBlockCountX() - 1 && z != 0 && z != box.getBlockCountZ() - 1) {
-                        if (y == (box.getBlockCountY() - 1)) {
+                        if (y == box.getBlockCountY()-1) {
                             d = '1';
-                        } else if (y == (box.getBlockCountY() - 2) && random.nextInt(4) == 2) {
+                        } else if (y == box.getBlockCountY()-2 && random.nextInt(4) == 2) {
                             d = '2';
                         }
                     }

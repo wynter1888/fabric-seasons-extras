@@ -1,0 +1,6 @@
+{
+	"parent": "seasonsextras:block/season_calendar",
+	"textures": {
+		"season": "seasonsextras:block/calendar/winter_7"
+	}
+}
