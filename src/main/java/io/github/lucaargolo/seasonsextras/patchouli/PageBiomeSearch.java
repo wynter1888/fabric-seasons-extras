@@ -3,6 +3,7 @@ package io.github.lucaargolo.seasonsextras.patchouli;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
+import io.github.lucaargolo.seasonsextras.utils.Tickable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -25,7 +26,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PageBiomeSearch extends PageText {
+public class PageBiomeSearch extends PageText implements Tickable {
 
     private static final Identifier PATCHOULI_EXTRAS = new ModIdentifier("textures/gui/patchouli_extras.png");
 
@@ -175,6 +176,7 @@ public class PageBiomeSearch extends PageText {
         return false;
     }
 
+    @Override
     public void tick() {
         searchBar.tick();
     }

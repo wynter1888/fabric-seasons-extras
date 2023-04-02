@@ -6,6 +6,7 @@ import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
 import io.github.lucaargolo.seasonsextras.mixin.PageMultiblockAccessor;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
+import io.github.lucaargolo.seasonsextras.utils.Tickable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.sound.PositionedSoundInstance;
@@ -24,7 +25,7 @@ import vazkii.patchouli.common.multiblock.SerializedMultiblock;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PageSeasonalBiome extends PageMultiblock  {
+public class PageSeasonalBiome extends PageMultiblock implements Tickable {
 
     private static final Identifier PATCHOULI_EXTRAS = new ModIdentifier("textures/gui/patchouli_extras.png");
 
@@ -111,6 +112,7 @@ public class PageSeasonalBiome extends PageMultiblock  {
         }else return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
+    @Override
     public void tick() {
         age++;
     }

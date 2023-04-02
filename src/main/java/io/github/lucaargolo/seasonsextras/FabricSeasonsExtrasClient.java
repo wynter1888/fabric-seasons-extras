@@ -10,6 +10,7 @@ import io.github.lucaargolo.seasonsextras.patchouli.PageSeasonalBiome;
 import io.github.lucaargolo.seasonsextras.utils.CalendarTooltipRenderer;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import io.github.lucaargolo.seasonsextras.utils.PatchouliModifications;
+import io.github.lucaargolo.seasonsextras.utils.Tickable;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -57,17 +58,10 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
                 FabricSeasonsExtrasClient.multiblockSeasonOverride = null;
             }else{
                 if(client.currentScreen instanceof GuiBookEntryAccessor bookEntry) {
-                    //TODO: Make TickablePage
-                    if(bookEntry.getLeftPage() instanceof PageBiomeSearch page) {
+                    if(bookEntry.getLeftPage() instanceof Tickable page) {
                         page.tick();
                     }
-                    if(bookEntry.getRightPage() instanceof PageBiomeSearch page) {
-                        page.tick();
-                    }
-                    if(bookEntry.getLeftPage() instanceof PageSeasonalBiome page) {
-                        page.tick();
-                    }
-                    if(bookEntry.getRightPage() instanceof PageSeasonalBiome page) {
+                    if(bookEntry.getRightPage() instanceof Tickable page) {
                         page.tick();
                     }
                 }
