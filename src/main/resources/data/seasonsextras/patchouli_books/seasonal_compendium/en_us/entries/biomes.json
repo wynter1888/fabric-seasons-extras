@@ -11,14 +11,8 @@
       "title": "Biomes"
     },
     {
-      "type": "patchouli:text",
-      "title": "Forest",
-      "text": "BIOME_INFO$(br2)$(2)Spring Temperature:$(0) SPRING_TEMPERATURE$(br)$(6)Summer Temperature: $(0)SUMMER_TEMPERATURE$(br)$(c)Fall Temperature: $(0)FALL_TEMPERATURE$(br)$(3)Winter Temperature: $(0)WINTER_TEMPERATURE$(br2)RAIN_INFO$(br2)SNOW_INFO"
-    },
-    {
-      "type": "seasonsextras:seasonal_biome",
-      "name": "Colors",
-      "enable_visualize": false
+      "type": "seasonsextras:modifiable",
+      "modify": "seasonsextras:seasonal_biomes"
     }
   ],
   "read_by_default": true

@@ -42,8 +42,6 @@ import net.minecraft.world.gen.feature.PlacedFeature;
 import net.minecraft.world.gen.feature.TreeFeature;
 import org.jetbrains.annotations.Nullable;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 
 public class FabricSeasonsExtras implements ModInitializer {
@@ -201,17 +199,6 @@ public class FabricSeasonsExtras implements ModInitializer {
         }else{
             server.getPlayerManager().getPlayerList().forEach(p -> ServerPlayNetworking.send(p, SEND_MULTIBLOCKS_S2C, buf));
         }
-    }
-
-
-    //TODO: I don't know what this is but it kind of works
-    public static double minecraftToCelsius(float x) {
-        double value = 1.02557113*x*x*x*x - 2.5249755*x*x*x + 0.61120004*x*x + 28.51377*x - 4.2984804;
-        return BigDecimal.valueOf(value).setScale(1, RoundingMode.HALF_UP).doubleValue();
-    }
-
-    public static double minecraftToFahrenheit(float x) {
-        return (minecraftToCelsius(x) * 1.8) + 32;
     }
 
 
