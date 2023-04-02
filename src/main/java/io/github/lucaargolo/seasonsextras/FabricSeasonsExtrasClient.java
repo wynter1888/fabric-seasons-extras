@@ -4,6 +4,7 @@ import com.google.gson.*;
 import io.github.lucaargolo.seasons.FabricSeasons;
 import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.mixin.GuiBookEntryAccessor;
+import io.github.lucaargolo.seasonsextras.patchouli.PageBiomeDescription;
 import io.github.lucaargolo.seasonsextras.patchouli.PageBiomeSearch;
 import io.github.lucaargolo.seasonsextras.patchouli.PageSeasonalBiome;
 import io.github.lucaargolo.seasonsextras.utils.CalendarTooltipRenderer;
@@ -17,10 +18,10 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.tag.BiomeTags;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
@@ -29,6 +30,7 @@ import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import vazkii.patchouli.client.book.ClientBookRegistry;
+import vazkii.patchouli.client.book.text.BookTextParser;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -44,10 +46,11 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
     public static final HashMap<RegistryKey<World>, HashMap<Identifier, Set<Identifier>>> worldBiomeMultiblocks = new HashMap<>();
     public static HashMap<Identifier, JsonObject> multiblocks = new HashMap<>();
 
+    public static boolean prefersCelsius = true;
+
+
     @Override
     public void onInitializeClient() {
-        ClientBookRegistry.INSTANCE.pageTypes.put(new ModIdentifier("biome_search"), PageBiomeSearch.class);
-        ClientBookRegistry.INSTANCE.pageTypes.put(new ModIdentifier("seasonal_biome"), PageSeasonalBiome.class);
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if(client.currentScreen == null) {
                 FabricSeasonsExtrasClient.multiblockBiomeOverride = null;
@@ -154,6 +157,14 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
             MinecraftClient client = MinecraftClient.getInstance();
             CalendarTooltipRenderer.render(client, matrixStack, tickDelta);
         }));
+
+        ClientBookRegistry.INSTANCE.pageTypes.put(new ModIdentifier("biome_search"), PageBiomeSearch.class);
+        ClientBookRegistry.INSTANCE.pageTypes.put(new ModIdentifier("seasonal_biome"), PageSeasonalBiome.class);
+        ClientBookRegistry.INSTANCE.pageTypes.put(new ModIdentifier("biome_description"), PageBiomeDescription.class);
+
+        BookTextParser.register((parameter, state) -> prefersCelsius ? minecraftToCelsius(parameter) : minecraftToFahrenheit(parameter), "seasonsextrastemperature");
+        BookTextParser.register((parameter, state) -> I18n.translate(parameter), "seasonsextrastranslate");
+
         PatchouliModifications.registerEntry(new ModIdentifier("biomes"), new ModIdentifier("seasonal_biomes"), (pages, index) -> {
             MinecraftClient client = MinecraftClient.getInstance();
             ClientWorld world = client.world;
@@ -172,7 +183,7 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
         Biome biome = entry.value();
         Identifier biomeId = entry.getKey().orElse(RegistryKey.of(Registry.BIOME_KEY, new Identifier("plains"))).getValue();
 
-        String biomeName = Text.translatable(biomeId.toTranslationKey("biome")).getString();
+        String biomeName = biomeId.toTranslationKey("biome");
         boolean isJungle = entry.isIn(BiomeTags.IS_JUNGLE) || entry.isIn(BiomeTags.HAS_CLOSER_WATER_FOG);
         Pair<Biome.Precipitation, Float> springPair = FabricSeasons.getSeasonWeather(Season.SPRING, isJungle, biome.getPrecipitation(),biome.getTemperature());
         Pair<Biome.Precipitation, Float> summerPair = FabricSeasons.getSeasonWeather(Season.SUMMER, isJungle, biome.getPrecipitation(),biome.getTemperature());
@@ -207,32 +218,32 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
             snowSeasons.add(Season.WINTER);
         }
 
-        String springTemperature = minecraftToCelsius(springPair.getRight()) + "°C";
-        String summerTemperature = minecraftToCelsius(summerPair.getRight()) + "°C";
-        String fallTemperature = minecraftToCelsius(fallPair.getRight()) + "°C";
-        String winterTemperature = minecraftToCelsius(winterPair.getRight()) + "°C";
+        String springTemperature = "$(seasonsextrastemperature:"+springPair.getRight()+")";
+        String summerTemperature = "$(seasonsextrastemperature:"+summerPair.getRight()+")";
+        String fallTemperature = "$(seasonsextrastemperature:"+fallPair.getRight()+")";
+        String winterTemperature = "$(seasonsextrastemperature:"+winterPair.getRight()+")";
 
-        StringBuilder rainInfo = new StringBuilder(rainSeasons.isEmpty() ? "It doesn't rain in this biome." : "It rains in this biome during ");
+        StringBuilder rainInfo = new StringBuilder(rainSeasons.isEmpty() ? "$(seasonsextrastranslate:patchouli.seasonsextras.doesnotrain)" : "$(seasonsextrastranslate:patchouli.seasonsextras.rainsduring)"+" ");
         for(int i = 0; i < rainSeasons.size(); i++) {
             Season season = rainSeasons.get(i);
-            rainInfo.append("$(").append(season.getDarkFormatting().getCode()).append(")").append(Text.translatable(season.getTranslationKey()).getString());
+            rainInfo.append("$(").append(season.getDarkFormatting().getCode()).append(")$(seasonsextrastranslate:").append(season.getTranslationKey()).append(")");
             if(i == rainSeasons.size()-1) {
                 rainInfo.append("$(0).");
             }else if(i == rainSeasons.size()-2) {
-                rainInfo.append("$(0) and ");
+                rainInfo.append("$(0) ").append("$(seasonsextrastranslate:patchouli.seasonsextras.and)").append(" ");
             }else{
                 rainInfo.append("$(0), ");
             }
         }
 
-        StringBuilder snowInfo = new StringBuilder(snowSeasons.isEmpty() ? "It doesn't snow in this biome." : "It snows in this biome during ");
+        StringBuilder snowInfo = new StringBuilder(snowSeasons.isEmpty() ? "$(seasonsextrastranslate:patchouli.seasonsextras.doesnotsnow)" : "$(seasonsextrastranslate:patchouli.seasonsextras.snowsduring)"+" ");
         for(int i = 0; i < snowSeasons.size(); i++) {
             Season season = snowSeasons.get(i);
-            snowInfo.append("$(").append(season.getDarkFormatting().getCode()).append(")").append(Text.translatable(season.getTranslationKey()).getString());
+            snowInfo.append("$(").append(season.getDarkFormatting().getCode()).append(")$(seasonsextrastranslate:").append(season.getTranslationKey()).append(")");
             if(i == snowSeasons.size()-1) {
                 snowInfo.append("$(0).");
             }else if(i == snowSeasons.size()-2) {
-                snowInfo.append("$(0) and ");
+                snowInfo.append("$(0) ").append("$(seasonsextrastranslate:patchouli.seasonsextras.and)").append(" ");
             }else{
                 snowInfo.append("$(0), ");
             }
@@ -240,32 +251,35 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
 
         String biomeInfo;
         if(isJungle) {
-            biomeInfo = "This is a $(2)tropical biome$(0). It's temperature doesn't change much during the year.";
+            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisa)"+" $(2)"+"$(seasonsextrastranslate:patchouli.seasonsextras.tropicalbiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.tropicaldesc)";
         }else if(springPair.getRight() <= 0.1) {
-            biomeInfo = "This is a $(3)frozen biome$(0). It is freezing cold for most of the year.";
+            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisa)"+" $(3)"+"$(seasonsextrastranslate:patchouli.seasonsextras.frozenbiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.frozendesc)";
         }else if(springPair.getRight() <= 0.3) {
-            biomeInfo = "This is a $(3)cold biome$(0). It is cold for most of the seasons but it gets warmer during the summer.";
+            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisa)"+" $(3)"+"$(seasonsextrastranslate:patchouli.seasonsextras.coldbiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.colddesc)";
         }else if(springPair.getRight() <= 0.95) {
-            biomeInfo = "This is a $(2)temperate biome$(0). It's temperatures change a lot during the year.";
+            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisa)"+" $(2)"+"$(seasonsextrastranslate:patchouli.seasonsextras.temperatebiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.temperatedesc)";
         }else{
-            biomeInfo = "This is a $(4)hot biome$(0). It's scalding hot for most of the year.";
+            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisa)"+" $(4)"+"$(seasonsextrastranslate:patchouli.seasonsextras.hotbiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.hotdesc)";
         }
 
         JsonObject biomeFirstPage = new JsonObject();
-        biomeFirstPage.add("type", new JsonPrimitive("patchouli:text"));
+        biomeFirstPage.add("type", new JsonPrimitive("seasonsextras:biome_description"));
         biomeFirstPage.add("title", new JsonPrimitive(biomeName));
-        biomeFirstPage.add("text", new JsonPrimitive("BIOME_INFO$(br2)$(2)Spring Temperature:$(0) SPRING_TEMPERATURE$(br)$(6)Summer Temperature: $(0)SUMMER_TEMPERATURE$(br)$(c)Fall Temperature: $(0)FALL_TEMPERATURE$(br)$(3)Winter Temperature: $(0)WINTER_TEMPERATURE$(br2)RAIN_INFO$(br2)SNOW_INFO"));
-        String biomeText = biomeFirstPage.get("text").getAsString()
-                .replace("SPRING_TEMPERATURE", springTemperature)
-                .replace("SUMMER_TEMPERATURE", summerTemperature)
-                .replace("FALL_TEMPERATURE", fallTemperature)
-                .replace("WINTER_TEMPERATURE", winterTemperature)
-                .replace("RAIN_INFO", rainInfo.toString())
-                .replace("SNOW_INFO", snowInfo.toString())
-                .replace("BIOME_INFO", biomeInfo)
-                .replace("BIOME_NAME", biomeName);
-        biomeFirstPage.add("anchor", new JsonPrimitive(biomeId.toString()));
+        String biomeText = biomeInfo +
+                "$(br2)" +
+                "$(2)" + "$(seasonsextrastranslate:patchouli.seasonsextras.springtemp)" + ": $(0)" + springTemperature +
+                "$(br)" +
+                "$(6)" + "$(seasonsextrastranslate:patchouli.seasonsextras.summertemp)" + ": $(0)" + summerTemperature +
+                "$(br)" +
+                "$(c)" + "$(seasonsextrastranslate:patchouli.seasonsextras.falltemp)" + ": $(0)" + fallTemperature +
+                "$(br)" +
+                "$(3)" + "$(seasonsextrastranslate:patchouli.seasonsextras.wintertemp)" + ": $(0)" + winterTemperature +
+                "$(br2)" +
+                rainInfo +
+                "$(br2)" +
+                snowInfo;
         biomeFirstPage.add("text", new JsonPrimitive(biomeText));
+        biomeFirstPage.add("anchor", new JsonPrimitive(biomeId.toString()));
 
         JsonObject biomeSecondPage = new JsonObject();
         biomeSecondPage.add("type", new JsonPrimitive("seasonsextras:seasonal_biome"));
@@ -303,14 +317,18 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
     }
 
     //I don't know what this is but it kind of works
-    public static double minecraftToCelsius(float x) {
-        double value = 1.02557113*x*x*x*x - 2.5249755*x*x*x + 0.61120004*x*x + 28.51377*x - 4.2984804;
-        return BigDecimal.valueOf(value).setScale(1, RoundingMode.HALF_UP).doubleValue();
+    private static double minecraftToCelsius(float x) {
+        return 1.02557113*x*x*x*x - 2.5249755*x*x*x + 0.61120004*x*x + 28.51377*x - 4.2984804;
     }
 
-    //TODO: Let player select between celsius and fahrenheit
-    public static double minecraftToFahrenheit(float x) {
-        return (minecraftToCelsius(x) * 1.8) + 32;
+    public static String minecraftToCelsius(String string) {
+        float x = Float.parseFloat(string);
+        return ""+BigDecimal.valueOf(minecraftToCelsius(x)).setScale(1, RoundingMode.HALF_UP).doubleValue()+ "°C";
+    }
+
+    public static String minecraftToFahrenheit(String string) {
+        float x = Float.parseFloat(string);
+        return ""+BigDecimal.valueOf((minecraftToCelsius(x) * 1.8) + 32).setScale(1, RoundingMode.HALF_UP).doubleValue()+ "°F";
     }
 
 }
