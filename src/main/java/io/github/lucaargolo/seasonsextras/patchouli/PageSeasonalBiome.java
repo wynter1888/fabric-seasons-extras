@@ -5,7 +5,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
 import io.github.lucaargolo.seasonsextras.mixin.PageMultiblockAccessor;
-import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import io.github.lucaargolo.seasonsextras.utils.Tickable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
@@ -26,8 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PageSeasonalBiome extends PageMultiblock implements Tickable {
-
-    private static final Identifier PATCHOULI_EXTRAS = new ModIdentifier("textures/gui/patchouli_extras.png");
 
     @SerializedName("biome_id") Identifier biomeId;
     @SerializedName("multiblocks") SerializedMultiblock[] serializedMultiblocks;
@@ -69,11 +66,11 @@ public class PageSeasonalBiome extends PageMultiblock implements Tickable {
         super.render(ms, mouseX, mouseY, pticks);
         FabricSeasonsExtrasClient.multiblockBiomeOverride = null;
         FabricSeasonsExtrasClient.multiblockSeasonOverride = null;
-        RenderSystem.setShaderTexture(0, PATCHOULI_EXTRAS);
-        DrawableHelper.drawTexture(ms, 6, 115, 23, 23, 0, selectedSeason == Season.SPRING ? 0 : 28, 28, 28, 256, 256);
-        DrawableHelper.drawTexture(ms, 33, 115, 23, 23, 28, selectedSeason == Season.SUMMER ? 0 : 28, 28, 28, 256, 256);
-        DrawableHelper.drawTexture(ms, 60, 115, 23, 23, 56, selectedSeason == Season.FALL ? 0 : 28, 28, 28, 256, 256);
-        DrawableHelper.drawTexture(ms, 87, 115, 23, 23, 84, selectedSeason == Season.WINTER ? 0 : 28, 28, 28, 256, 256);
+        RenderSystem.setShaderTexture(0, parent.getBookTexture());
+        DrawableHelper.drawTexture(ms, 6, 115, 23, 23, 352, selectedSeason == Season.SPRING ? 0 : 28, 28, 28, 512, 256);
+        DrawableHelper.drawTexture(ms, 33, 115, 23, 23, 380, selectedSeason == Season.SUMMER ? 0 : 28, 28, 28, 512, 256);
+        DrawableHelper.drawTexture(ms, 60, 115, 23, 23, 408, selectedSeason == Season.FALL ? 0 : 28, 28, 28, 512, 256);
+        DrawableHelper.drawTexture(ms, 87, 115, 23, 23, 436, selectedSeason == Season.WINTER ? 0 : 28, 28, 28, 512, 256);
         int mx = mouseX-parent.bookLeft;
         int my = mouseY-parent.bookTop;
         if(mx > 6 && mx < 6+23 && my > 115 && my < 115+23) {

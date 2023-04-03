@@ -8,14 +8,16 @@
     "WorldMixin"
   ],
   "client": [
-    "PageMultiblockAccessor",
     "AbstractMultiblockMixin",
+    "BookContentsBuilderMixin",
     "FabricSeasonsMixin",
+    "FontManagerMixin",
     "GuiBookAccessor",
     "GuiBookEntryAccessor",
+    "GuiBookEntryMixin",
+    "MinecraftClientAccessor",
     "MouseMixin",
-    "BookContentsBuilderMixin",
-    "GuiBookEntryMixin"
+    "PageMultiblockAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

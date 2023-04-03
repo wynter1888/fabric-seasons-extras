@@ -6,5 +6,10 @@
   "show_progress": false,
   "pamphlet": true,
   "text_overflow_mode": "truncate",
-  "i18n": true
+  "i18n": true,
+  "book_texture": "seasonsextras:textures/gui/seasonal_compendium.png",
+  "version": 1,
+  "nameplate_color": "64D637",
+  "link_color": "579A20",
+  "link_hover_color": "5BBB26"
 }

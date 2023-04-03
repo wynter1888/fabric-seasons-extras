@@ -2,19 +2,14 @@ package io.github.lucaargolo.seasonsextras.patchouli;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
-import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.gui.BookTextRenderer;
 import vazkii.patchouli.client.book.gui.GuiBookEntry;
 import vazkii.patchouli.client.book.page.PageText;
 
 public class PageBiomeDescription extends PageText {
-
-    private static final Identifier PATCHOULI_EXTRAS = new ModIdentifier("textures/gui/patchouli_extras.png");
-
 
     private transient BookTextRenderer textRender;
 
@@ -22,12 +17,12 @@ public class PageBiomeDescription extends PageText {
     public void render(MatrixStack ms, int mouseX, int mouseY, float pticks) {
         super.render(ms, mouseX, mouseY, pticks);
         textRender.render(ms, mouseX, mouseY);
-        RenderSystem.setShaderTexture(0, PATCHOULI_EXTRAS);
+        RenderSystem.setShaderTexture(0, parent.getBookTexture());
         int mx = mouseX-parent.bookLeft;
         int my = mouseY-parent.bookTop;
-        DrawableHelper.drawTexture(ms, -28, 0, 27f, FabricSeasonsExtrasClient.prefersCelsius ? 66f : 56f, 13, 10, 256, 256);
+        DrawableHelper.drawTexture(ms, -28, 0, 352f+27f, FabricSeasonsExtrasClient.prefersCelsius ? 56f : 66f, 13, 10, 512, 256);
         if(mx > -28 && mx < -28+13 && my > 0 && my < 10) {
-            DrawableHelper.drawTexture(ms, -28, 0, 14f, FabricSeasonsExtrasClient.prefersCelsius ? 66f : 56f, 13, 10, 256, 256);
+            DrawableHelper.drawTexture(ms, -28, 0, 352f+14f, FabricSeasonsExtrasClient.prefersCelsius ? 56f : 66f, 13, 10, 512, 256);
             parent.renderTooltip(ms, FabricSeasonsExtrasClient.prefersCelsius ? Text.translatable("patchouli.seasonsextras.changetofahrenheit") : Text.translatable("patchouli.seasonsextras.changetocelsius"), mx, my);
         }
     }

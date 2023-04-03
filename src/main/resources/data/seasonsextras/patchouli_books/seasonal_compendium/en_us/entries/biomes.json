@@ -1,7 +1,7 @@
 {
   "name": "patchouli.seasonsextras.biomes",
   "category": "seasonsextras:compendium",
-  "icon": "minecraft:oak_sapling",
+  "icon": "minecraft:oak_leaves",
   "pages": [
     {
       "type": "patchouli:empty"
@@ -15,5 +15,6 @@
       "modify": "seasonsextras:seasonal_biomes"
     }
   ],
-  "read_by_default": true
+  "read_by_default": true,
+  "sortnum": 0
 }

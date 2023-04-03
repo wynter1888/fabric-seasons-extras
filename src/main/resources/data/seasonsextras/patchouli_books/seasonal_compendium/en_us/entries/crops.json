@@ -1,7 +1,8 @@
 {
   "name": "patchouli.seasonsextras.crops",
   "category": "seasonsextras:compendium",
-  "icon": "minecraft:wheat_seeds",
+  "icon": "minecraft:wheat",
   "pages": [],
-  "read_by_default": true
+  "read_by_default": true,
+  "sortnum": 1
 }

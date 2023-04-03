@@ -2,13 +2,16 @@ package io.github.lucaargolo.seasonsextras.patchouli;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
-import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
+import io.github.lucaargolo.seasonsextras.mixed.FontManagerMixed;
+import io.github.lucaargolo.seasonsextras.mixin.MinecraftClientAccessor;
 import io.github.lucaargolo.seasonsextras.utils.Tickable;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
@@ -28,10 +31,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PageBiomeSearch extends PageText implements Tickable {
 
-    private static final Identifier PATCHOULI_EXTRAS = new ModIdentifier("textures/gui/patchouli_extras.png");
-
-
     private final transient List<Pair<Identifier, String>> biomes = new ArrayList<>();
+
+    private transient TextRenderer fontRenderer;
     private transient BookTextRenderer textRender;
     private transient TextFieldWidget searchBar;
 
@@ -43,15 +45,18 @@ public class PageBiomeSearch extends PageText implements Tickable {
 
     @Override
     public void render(MatrixStack ms, int mouseX, int mouseY, float pticks) {
+
         super.render(ms, mouseX, mouseY, pticks);
+        RenderSystem.setShaderTexture(0, parent.getBookTexture());
+        DrawableHelper.drawTexture(ms, 6, 135, 140f, 183f, 99, 14, 512, 256);
         textRender.render(ms, mouseX, mouseY);
-        RenderSystem.setShaderTexture(0, PATCHOULI_EXTRAS);
+        RenderSystem.setShaderTexture(0, parent.getBookTexture());
         if(scrollable) {
             int mx = mouseX-parent.bookLeft;
             int my = mouseY-parent.bookTop;
             double offset = MathHelper.lerp(scrollableOffset/excessHeight, 12, 104);
-            DrawableHelper.drawTexture(ms, 99, 11, 0f, 56f, 8, 115, 256, 256);
-            DrawableHelper.drawTexture(ms, 100, (int) offset, 8f, 56f, 6, 21, 256, 256);
+            DrawableHelper.drawTexture(ms, 99, 11, 352f, 56f, 8, 115, 512, 256);
+            DrawableHelper.drawTexture(ms, 100, (int) offset, 360f, 56f, 6, 21, 512, 256);
             if(mx > 100 && mx < 106 && my > offset && my < offset+21) {
                 DrawableHelper.fill(ms, 100, (int) offset, 106, (int) offset + 21, -2130706433);
             }
@@ -75,9 +80,12 @@ public class PageBiomeSearch extends PageText implements Tickable {
             });
         }
         textRender = new BookTextRenderer(parent, text.as(Text.class), 0, 12);
-        int textSize = (int) (fontRenderer.getWidth("Search:")*0.8);
-        searchBar = new TextFieldWidget(fontRenderer, parent.bookLeft+left+textSize, parent.bookTop+top+138, 105-textSize, 10, Text.literal(""));
+        fontRenderer = ((FontManagerMixed) ((MinecraftClientAccessor) client).getFontManager()).createStyledTextRenderer(book.getFontStyle());
+        searchBar = new TextFieldWidget(fontRenderer, parent.bookLeft+left+21, parent.bookTop+top+136, 115, 10, Text.literal(""));
+        searchBar.setEditableColor(0);
+        searchBar.setDrawsBackground(false);
         searchBar.setChangedListener(this::updateText);
+        searchBar.setRenderTextProvider((string, firstCharacterIndex) -> OrderedText.styledForwardsVisitedString(string, parent.book.getFontStyle()));
         parent.addDrawableChild(searchBar);
         updateText(searchBar.getText());
     }
@@ -102,7 +110,7 @@ public class PageBiomeSearch extends PageText implements Tickable {
         while (height.getAndIncrement() < 13) {
             string.getAndUpdate(t -> t + "$(br)");
         }
-        string.getAndUpdate(t -> t + "$(br)Search: ");
+        string.getAndUpdate(t -> t + "$(br)");
         setText(string.get());
         textRender = new BookTextRenderer(parent, text.as(Text.class), 0, getTextHeight());
     }
@@ -121,7 +129,7 @@ public class PageBiomeSearch extends PageText implements Tickable {
             while (height.getAndIncrement() < 13) {
                 string.getAndUpdate(t -> t + "$(br)");
             }
-            string.getAndUpdate(t -> t + "$(br)Search: ");
+            string.getAndUpdate(t -> t + "$(br)");
             setText(string.get());
             textRender = new BookTextRenderer(parent, text.as(Text.class), 0, getTextHeight());
         }
