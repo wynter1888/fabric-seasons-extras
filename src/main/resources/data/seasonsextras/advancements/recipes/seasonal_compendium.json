@@ -2,16 +2,16 @@
   "parent": "minecraft:recipes/root",
   "rewards": {
     "recipes": [
-      "seasonsextras:season_calendar"
+      "seasonsextras:seasonal_compendium"
     ]
   },
   "criteria": {
-    "has_clock": {
+    "has_sapling": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
-            "item": "minecraft:clock"
+            "tag": "minecraft:saplings"
           }
         ]
       }
@@ -19,7 +19,7 @@
   },
   "requirements": [
     [
-      "has_clock"
+      "has_sapling"
     ]
   ]
 }

@@ -15,18 +15,11 @@
           }
         ]
       }
-    },
-    "has_the_recipe": {
-      "trigger": "minecraft:recipe_unlocked",
-      "conditions": {
-        "recipe": "seasonsextras:season_detector"
-      }
     }
   },
   "requirements": [
     [
-      "has_detector",
-      "has_the_recipe"
+      "has_detector"
     ]
   ]
 }

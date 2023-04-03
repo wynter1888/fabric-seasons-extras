@@ -5,7 +5,16 @@
       "item": "minecraft:clock"
     },
     {
-      "item": "minecraft:book"
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:paper"
     }
   ],
   "result": {
