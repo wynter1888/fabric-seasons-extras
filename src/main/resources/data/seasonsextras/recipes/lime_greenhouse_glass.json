@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#G#",
+    "G#G",
+    "#G#"
+  ],
+  "key": {
+    "#": {
+      "tag": "minecraft:planks"
+    },
+    "G": {
+      "item": "minecraft:lime_stained_glass"
+    }
+  },
+  "result": {
+    "item": "seasonsextras:lime_greenhouse_glass",
+    "count": 4
+  }
+}

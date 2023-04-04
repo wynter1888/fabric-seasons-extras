@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "seasonsextras:block/red_greenhouse_glass"
+  }
+}

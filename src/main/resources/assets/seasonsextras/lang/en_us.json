@@ -1,8 +1,26 @@
 {
   "item.seasonsextras.seasonal_compendium": "Seasonal Compendium",
+  "item.seasonsextras.crop_season_tester": "Crop Season Tester",
+
   "block.seasonsextras.season_calendar": "Season Calendar",
   "block.seasonsextras.season_detector": "Season Detector",
-  "block.seasonsextras.greenhouse_glass": "Greenhouse Glass",
+  "block.seasonsextras.black_greenhouse_glass": "Black Greenhouse Glass",
+  "block.seasonsextras.blue_greenhouse_glass": "Blue Greenhouse Glass",
+  "block.seasonsextras.brown_greenhouse_glass": "Brown Greenhouse Glass",
+  "block.seasonsextras.cyan_greenhouse_glass": "Cyan Greenhouse Glass",
+  "block.seasonsextras.gray_greenhouse_glass": "Gray Greenhouse Glass",
+  "block.seasonsextras.green_greenhouse_glass": "Green Greenhouse Glass",
+  "block.seasonsextras.light_blue_greenhouse_glass": "Light Blue Greenhouse Glass",
+  "block.seasonsextras.light_gray_greenhouse_glass": "Light Gray Greenhouse Glass",
+  "block.seasonsextras.lime_greenhouse_glass": "Lime Greenhouse Glass",
+  "block.seasonsextras.magenta_greenhouse_glass": "Magenta Greenhouse Glass",
+  "block.seasonsextras.orange_greenhouse_glass": "Orange Greenhouse Glass",
+  "block.seasonsextras.pink_greenhouse_glass": "Pink Greenhouse Glass",
+  "block.seasonsextras.purple_greenhouse_glass": "Purple Greenhouse Glass",
+  "block.seasonsextras.red_greenhouse_glass": "Red Greenhouse Glass",
+  "block.seasonsextras.white_greenhouse_glass": "White Greenhouse Glass",
+  "block.seasonsextras.yellow_greenhouse_glass": "Yellow Greenhouse Glass",
+
   "tooltip.seasonsextras.calendar_info_1": "It's currently ",
   "tooltip.seasonsextras.calendar_info_2": " days left to ",
 

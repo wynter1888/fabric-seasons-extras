@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.lucaargolo.seasons.FabricSeasons;
 import io.github.lucaargolo.seasons.utils.Season;
+import io.github.lucaargolo.seasonsextras.block.GreenhouseGlassBlock;
 import io.github.lucaargolo.seasonsextras.mixin.GuiBookEntryAccessor;
 import io.github.lucaargolo.seasonsextras.patchouli.FabricSeasonsExtrasPatchouliCompat;
 import io.github.lucaargolo.seasonsextras.utils.CalendarTooltipRenderer;
@@ -137,7 +138,9 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
                 }
             }
         });
-        BlockRenderLayerMap.INSTANCE.putBlock(Registry.BLOCK.get(new ModIdentifier("greenhouse_glass")), RenderLayer.getTranslucent());
+        for (GreenhouseGlassBlock block : FabricSeasonsExtras.GREENHOUSE_GLASS_BLOCKS) {
+            BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getTranslucent());
+        }
         BlockRenderLayerMap.INSTANCE.putBlock(Registry.BLOCK.get(new ModIdentifier("season_calendar")), RenderLayer.getCutout());
         HudRenderCallback.EVENT.register(((matrixStack, tickDelta) -> {
             MinecraftClient client = MinecraftClient.getInstance();

@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#G#",
+    "G#G",
+    "#G#"
+  ],
+  "key": {
+    "#": {
+      "tag": "minecraft:planks"
+    },
+    "G": {
+      "item": "minecraft:cyan_stained_glass"
+    }
+  },
+  "result": {
+    "item": "seasonsextras:cyan_greenhouse_glass",
+    "count": 4
+  }
+}

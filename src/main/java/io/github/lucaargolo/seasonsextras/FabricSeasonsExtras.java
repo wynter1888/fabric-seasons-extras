@@ -9,7 +9,9 @@ import io.github.lucaargolo.seasonsextras.block.SeasonDetectorBlock;
 import io.github.lucaargolo.seasonsextras.blockentities.GreenhouseGlassBlockEntity;
 import io.github.lucaargolo.seasonsextras.blockentities.SeasonCalendarBlockEntity;
 import io.github.lucaargolo.seasonsextras.blockentities.SeasonDetectorBlockEntity;
+import io.github.lucaargolo.seasonsextras.item.GreenHouseGlassItem;
 import io.github.lucaargolo.seasonsextras.item.SeasonCalendarItem;
+import io.github.lucaargolo.seasonsextras.item.CropSeasonTesterItem;
 import io.github.lucaargolo.seasonsextras.item.SeasonalCompendiumItem;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import io.github.lucaargolo.seasonsextras.patchouli.PatchouliMultiblockCreator;
@@ -30,6 +32,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.tag.BlockTags;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
@@ -56,6 +59,7 @@ public class FabricSeasonsExtras implements ModInitializer {
 
     //Blocks
     public static SeasonCalendarBlock SEASON_CALENDAR_BLOCK;
+    public static GreenhouseGlassBlock[] GREENHOUSE_GLASS_BLOCKS = new GreenhouseGlassBlock[16];
 
     //Items
     public static ModIdentifier SEASONAL_COMPENDIUM_ITEM_ID = new ModIdentifier("seasonal_compendium");
@@ -80,9 +84,14 @@ public class FabricSeasonsExtras implements ModInitializer {
         SEASON_DETECTOR_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, new ModIdentifier("season_detector"), FabricBlockEntityTypeBuilder.create(seasonDetector::createBlockEntity, seasonDetector).build(null));
         Registry.register(Registry.ITEM, new ModIdentifier("season_detector"), new BlockItem(seasonDetector, new Item.Settings().group(ItemGroup.REDSTONE)));
 
-        GreenhouseGlassBlock greenhouseGlass = Registry.register(Registry.BLOCK, new ModIdentifier("greenhouse_glass"), new GreenhouseGlassBlock(FabricBlockSettings.copyOf(Blocks.GREEN_STAINED_GLASS)));
-        GREENHOUSE_GLASS_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, new ModIdentifier("greenhouse_glass"), FabricBlockEntityTypeBuilder.create(greenhouseGlass::createBlockEntity, greenhouseGlass).build(null));
-        Registry.register(Registry.ITEM, new ModIdentifier("greenhouse_glass"), new BlockItem(greenhouseGlass, new Item.Settings().group(ItemGroup.DECORATIONS)));
+        for (DyeColor value : DyeColor.values()) {
+            GreenhouseGlassBlock greenhouseGlass = Registry.register(Registry.BLOCK, new ModIdentifier(value.getName()+"_greenhouse_glass"), new GreenhouseGlassBlock(FabricBlockSettings.copyOf(Blocks.GREEN_STAINED_GLASS)));
+            Registry.register(Registry.ITEM, new ModIdentifier(value.getName()+"_greenhouse_glass"), new GreenHouseGlassItem(greenhouseGlass, new Item.Settings().group(ItemGroup.DECORATIONS)));
+            GREENHOUSE_GLASS_BLOCKS[value.ordinal()] = greenhouseGlass;
+        }
+        GREENHOUSE_GLASS_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, new ModIdentifier("greenhouse_glass"), FabricBlockEntityTypeBuilder.create(GreenhouseGlassBlockEntity::new, GREENHOUSE_GLASS_BLOCKS).build(null));
+
+        Registry.register(Registry.ITEM, new ModIdentifier("crop_season_tester"), new CropSeasonTesterItem(new Item.Settings().group(ItemGroup.REDSTONE)));
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             sendValidBiomes(server, handler.player);
