@@ -1,4 +1,4 @@
-package io.github.lucaargolo.seasonsextras.patchouli;
+package io.github.lucaargolo.seasonsextras.patchouli.page;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;

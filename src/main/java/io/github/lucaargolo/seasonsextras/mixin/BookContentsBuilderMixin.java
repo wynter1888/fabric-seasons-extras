@@ -3,7 +3,7 @@ package io.github.lucaargolo.seasonsextras.mixin;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.github.lucaargolo.seasonsextras.utils.PatchouliModifications;
+import io.github.lucaargolo.seasonsextras.patchouli.PatchouliModifications;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;

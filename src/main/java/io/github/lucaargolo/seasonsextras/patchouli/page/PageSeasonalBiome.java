@@ -1,4 +1,4 @@
-package io.github.lucaargolo.seasonsextras.patchouli;
+package io.github.lucaargolo.seasonsextras.patchouli.page;
 
 import com.google.gson.annotations.SerializedName;
 import com.mojang.blaze3d.systems.RenderSystem;

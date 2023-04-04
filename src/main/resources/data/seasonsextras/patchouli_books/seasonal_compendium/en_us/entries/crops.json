@@ -2,7 +2,19 @@
   "name": "patchouli.seasonsextras.crops",
   "category": "seasonsextras:compendium",
   "icon": "minecraft:wheat",
-  "pages": [],
+  "pages": [
+    {
+      "type": "patchouli:empty"
+    },
+    {
+      "type": "seasonsextras:crop_search",
+      "title": "patchouli.seasonsextras.crops"
+    },
+    {
+      "type": "seasonsextras:modifiable",
+      "modify": "seasonsextras:seasonal_crops"
+    }
+  ],
   "read_by_default": true,
   "sortnum": 1
 }

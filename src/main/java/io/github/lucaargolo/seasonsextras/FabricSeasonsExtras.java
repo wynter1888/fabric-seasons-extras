@@ -12,7 +12,7 @@ import io.github.lucaargolo.seasonsextras.blockentities.SeasonDetectorBlockEntit
 import io.github.lucaargolo.seasonsextras.item.SeasonCalendarItem;
 import io.github.lucaargolo.seasonsextras.item.SeasonalCompendiumItem;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
-import io.github.lucaargolo.seasonsextras.utils.PatchouliMultiblockCreator;
+import io.github.lucaargolo.seasonsextras.patchouli.PatchouliMultiblockCreator;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;

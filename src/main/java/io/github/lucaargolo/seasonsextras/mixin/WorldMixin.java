@@ -1,6 +1,6 @@
 package io.github.lucaargolo.seasonsextras.mixin;
 
-import io.github.lucaargolo.seasonsextras.utils.PatchouliMultiblockCreator;
+import io.github.lucaargolo.seasonsextras.patchouli.PatchouliMultiblockCreator;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;

@@ -1,8 +1,9 @@
-package io.github.lucaargolo.seasonsextras.utils;
+package io.github.lucaargolo.seasonsextras.patchouli;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 

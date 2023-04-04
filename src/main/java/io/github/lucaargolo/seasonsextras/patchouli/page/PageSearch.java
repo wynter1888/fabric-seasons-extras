@@ -1,4 +1,4 @@
-package io.github.lucaargolo.seasonsextras.patchouli;
+package io.github.lucaargolo.seasonsextras.patchouli.page;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
@@ -29,11 +29,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PageBiomeSearch extends PageText implements Tickable {
+public abstract class PageSearch extends PageText implements Tickable {
 
-    private final transient List<Pair<Identifier, String>> biomes = new ArrayList<>();
+    protected final transient List<Pair<Identifier, String>> searchable = new ArrayList<>();
 
-    private transient TextRenderer fontRenderer;
+    protected abstract String getSearchable();
+
     private transient BookTextRenderer textRender;
     private transient TextFieldWidget searchBar;
 
@@ -66,21 +67,8 @@ public class PageBiomeSearch extends PageText implements Tickable {
     @Override
     public void onDisplayed(GuiBookEntry parent, int left, int top) {
         super.onDisplayed(parent, left, top);
-        biomes.clear();
-        MinecraftClient client = MinecraftClient.getInstance();
-        ClientWorld world = client.world;
-        if(world != null) {
-            RegistryKey<World> worldKey = world.getRegistryKey();
-            FabricSeasonsExtrasClient.worldValidBiomes.getOrDefault(worldKey, new HashSet<>()).forEach(entry -> {
-                entry.getKey().ifPresent(key -> {
-                    Identifier biomeId = key.getValue();
-                    String biomeName = Text.translatable(biomeId.toTranslationKey("biome")).getString();
-                    biomes.add(new Pair<>(biomeId, biomeName));
-                });
-            });
-        }
         textRender = new BookTextRenderer(parent, text.as(Text.class), 0, 12);
-        fontRenderer = ((FontManagerMixed) ((MinecraftClientAccessor) client).getFontManager()).createStyledTextRenderer(book.getFontStyle());
+        TextRenderer fontRenderer = ((FontManagerMixed) ((MinecraftClientAccessor) MinecraftClient.getInstance()).getFontManager()).createStyledTextRenderer(book.getFontStyle());
         searchBar = new TextFieldWidget(fontRenderer, parent.bookLeft+left+21, parent.bookTop+top+136, 115, 10, Text.literal(""));
         searchBar.setEditableColor(0);
         searchBar.setDrawsBackground(false);
@@ -98,9 +86,9 @@ public class PageBiomeSearch extends PageText implements Tickable {
         AtomicReference<String> string = new AtomicReference<>("");
         AtomicInteger height = new AtomicInteger(0);
         AtomicInteger overflow = new AtomicInteger(0);
-        biomes.stream().filter(p -> p.getRight().toLowerCase().contains(search.toLowerCase())).forEach(p -> {
+        searchable.stream().filter(p -> p.getRight().toLowerCase().contains(search.toLowerCase())).forEach(p -> {
             if(height.getAndIncrement() < 13) {
-                string.getAndUpdate(t -> t + "$(l:biomes#"+p.getLeft()+")"+p.getRight()+"$(br)$()");
+                string.getAndUpdate(t -> t + "$(l:"+getSearchable()+"#"+p.getLeft()+")"+p.getRight()+"$(br)$()");
             }else{
                 scrollable = true;
                 overflow.getAndIncrement();
@@ -118,12 +106,12 @@ public class PageBiomeSearch extends PageText implements Tickable {
     public void updateTextHeight() {
         String search = searchBar.getText();
         int cycle = MathHelper.floor(scrollableOffset/GuiBook.TEXT_LINE_HEIGHT);
-        if(cycle < biomes.size()) {
+        if(cycle < searchable.size()) {
             AtomicReference<String> string = new AtomicReference<>("");
             AtomicInteger height = new AtomicInteger(0);
-            biomes.subList(cycle, biomes.size()).stream().filter(p -> p.getRight().toLowerCase().contains(search.toLowerCase())).forEach(p -> {
+            searchable.subList(cycle, searchable.size()).stream().filter(p -> p.getRight().toLowerCase().contains(search.toLowerCase())).forEach(p -> {
                 if(height.getAndIncrement() < 13) {
-                    string.getAndUpdate(t -> t + "$(l:biomes#"+p.getLeft()+")"+p.getRight()+"$(br)$()");
+                    string.getAndUpdate(t -> t + "$(l:"+getSearchable()+"#"+p.getLeft()+")"+p.getRight()+"$(br)$()");
                 }
             });
             while (height.getAndIncrement() < 13) {

@@ -32,5 +32,13 @@
   "patchouli.seasonsextras.frozendesc": "It is freezing cold for most of the year.",
   "patchouli.seasonsextras.colddesc": "It is cold for most of the seasons but it gets warmer during the summer.",
   "patchouli.seasonsextras.temperatedesc": "It's temperatures change a lot during the year.",
-  "patchouli.seasonsextras.hotdesc": "It's scalding hot for most of the year."
+  "patchouli.seasonsextras.hotdesc": "It's scalding hot for most of the year.",
+  "patchouli.seasonsextras.crop": "crop",
+  "patchouli.seasonsextras.growsfasterduringthese": "It grows faster during these seasons.",
+  "patchouli.seasonsextras.growsfasterduringthis": "It grows faster during this season.",
+  "patchouli.seasonsextras.fastergrowduring": "Grows faster during",
+  "patchouli.seasonsextras.normalgrowduring": "Grows normally during",
+  "patchouli.seasonsextras.slowedgrowduring": "Grows slower during",
+  "patchouli.seasonsextras.notgrowduring": "Won't grow during",
+  "patchouli.seasonsextras.multiplier": "Multiplier"
 }

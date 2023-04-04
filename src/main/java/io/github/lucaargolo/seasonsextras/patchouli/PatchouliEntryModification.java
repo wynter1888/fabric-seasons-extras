@@ -1,4 +1,4 @@
-package io.github.lucaargolo.seasonsextras.utils;
+package io.github.lucaargolo.seasonsextras.patchouli;
 
 import com.google.gson.JsonArray;
 
