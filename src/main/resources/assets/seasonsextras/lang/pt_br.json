@@ -23,7 +23,7 @@
   "patchouli.seasonsextras.summertemp": "Temp. no Verão",
   "patchouli.seasonsextras.falltemp": "Temp. no Outono",
   "patchouli.seasonsextras.wintertemp": "Temp. no Inverno",
-  "patchouli.seasonsextras.thisisa": "Esse é um",
+  "patchouli.seasonsextras.thisisabiome": "Esse é um",
   "patchouli.seasonsextras.tropicalbiome": "bioma tropical",
   "patchouli.seasonsextras.frozenbiome": "bioma congelado",
   "patchouli.seasonsextras.coldbiome": "bioma frio",
@@ -33,5 +33,14 @@
   "patchouli.seasonsextras.frozendesc": "É um frio congelante durante a maior parte do ano.",
   "patchouli.seasonsextras.colddesc": "É frio durante a maioria das estações, e morno no verão.",
   "patchouli.seasonsextras.temperatedesc": "Sua temperatura varia bastante ao longo do ano.",
-  "patchouli.seasonsextras.hotdesc": "É um calor escaldante durante a maior parte do ano."
+  "patchouli.seasonsextras.hotdesc": "É um calor escaldante durante a maior parte do ano.",
+  "patchouli.seasonsextras.thisisacrop": "Essa é uma planta do(a)",
+  "patchouli.seasonsextras.crop": "",
+  "patchouli.seasonsextras.growsfasterduringthese": "Ela cresce mais rapido nessas estações.",
+  "patchouli.seasonsextras.growsfasterduringthis": "Ela cresce mais rapido nessa estação.",
+  "patchouli.seasonsextras.fastergrowduring": "Cresce + rapido no(a)",
+  "patchouli.seasonsextras.normalgrowduring": "Cresce normal no(a)",
+  "patchouli.seasonsextras.slowedgrowduring": "Cresce + lento no(a)",
+  "patchouli.seasonsextras.notgrowduring": "Não cresce no(a)",
+  "patchouli.seasonsextras.multiplier": "Multiplicador"
 }

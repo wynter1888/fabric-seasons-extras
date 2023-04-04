@@ -141,15 +141,15 @@ public class FabricSeasonsExtrasPatchouliCompat {
 
         String biomeInfo;
         if(isJungle) {
-            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisa)"+" $(2)"+"$(seasonsextrastranslate:patchouli.seasonsextras.tropicalbiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.tropicaldesc)";
+            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisabiome)"+" $(2)"+"$(seasonsextrastranslate:patchouli.seasonsextras.tropicalbiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.tropicaldesc)";
         }else if(springPair.getRight() <= 0.1) {
-            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisa)"+" $(3)"+"$(seasonsextrastranslate:patchouli.seasonsextras.frozenbiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.frozendesc)";
+            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisabiome)"+" $(3)"+"$(seasonsextrastranslate:patchouli.seasonsextras.frozenbiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.frozendesc)";
         }else if(springPair.getRight() <= 0.3) {
-            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisa)"+" $(3)"+"$(seasonsextrastranslate:patchouli.seasonsextras.coldbiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.colddesc)";
+            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisabiome)"+" $(3)"+"$(seasonsextrastranslate:patchouli.seasonsextras.coldbiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.colddesc)";
         }else if(springPair.getRight() <= 0.95) {
-            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisa)"+" $(2)"+"$(seasonsextrastranslate:patchouli.seasonsextras.temperatebiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.temperatedesc)";
+            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisabiome)"+" $(2)"+"$(seasonsextrastranslate:patchouli.seasonsextras.temperatebiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.temperatedesc)";
         }else{
-            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisa)"+" $(4)"+"$(seasonsextrastranslate:patchouli.seasonsextras.hotbiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.hotdesc)";
+            biomeInfo = "$(seasonsextrastranslate:patchouli.seasonsextras.thisisabiome)"+" $(4)"+"$(seasonsextrastranslate:patchouli.seasonsextras.hotbiome)"+"$(0). "+"$(seasonsextrastranslate:patchouli.seasonsextras.hotdesc)";
         }
 
         JsonObject biomeFirstPage = new JsonObject();
@@ -213,7 +213,7 @@ public class FabricSeasonsExtrasPatchouliCompat {
         if(fallMultiplier == maxMultiplier) cropSeasons.add(Season.FALL); else alternateSeasons.add(Season.FALL);
         if(winterMultiplier == maxMultiplier) cropSeasons.add(Season.WINTER); else alternateSeasons.add(Season.WINTER);
 
-        StringBuilder cropText = new StringBuilder("$(seasonsextrastranslate:patchouli.seasonsextras.thisisa)"+" ");
+        StringBuilder cropText = new StringBuilder("$(seasonsextrastranslate:patchouli.seasonsextras.thisisacrop)"+" ");
         for(int i = 0; i < cropSeasons.size(); i++) {
             Season season = cropSeasons.get(i);
             cropText.append("$(").append(season.getDarkFormatting().getCode()).append(")$(seasonsextrastranslate:").append(season.getTranslationKey()).append(")");
