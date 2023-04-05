@@ -7,7 +7,7 @@ import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.block.GreenhouseGlassBlock;
 import io.github.lucaargolo.seasonsextras.mixin.GuiBookEntryAccessor;
 import io.github.lucaargolo.seasonsextras.patchouli.FabricSeasonsExtrasPatchouliCompat;
-import io.github.lucaargolo.seasonsextras.utils.CalendarTooltipRenderer;
+import io.github.lucaargolo.seasonsextras.utils.TooltipRenderer;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import io.github.lucaargolo.seasonsextras.utils.Tickable;
 import net.fabricmc.api.ClientModInitializer;
@@ -21,6 +21,7 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryKey;
@@ -41,6 +42,8 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
     public static HashMap<Identifier, JsonObject> multiblocks = new HashMap<>();
 
     public static boolean prefersCelsius = true;
+    public static BlockPos testedPos = null;
+    public static Season testedSeason = null;
 
 
     @Override
@@ -59,6 +62,14 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
                     }
                 }
             }
+        });
+        ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_TESTED_SEASON_S2C, (client, handler, buf, responseSender) -> {
+            BlockPos receivedTestedPos = buf.readBlockPos();
+            Season receivedTestedSeason = buf.readEnumConstant(Season.class);
+            client.execute(() -> {
+                testedPos = receivedTestedPos;
+                testedSeason = receivedTestedSeason;
+            });
         });
         ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_VALID_BIOMES_S2C, (client, handler, buf, responseSender) -> {
             HashSet<Identifier> validBiomes = new HashSet<>();
@@ -144,7 +155,7 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(Registry.BLOCK.get(new ModIdentifier("season_calendar")), RenderLayer.getCutout());
         HudRenderCallback.EVENT.register(((matrixStack, tickDelta) -> {
             MinecraftClient client = MinecraftClient.getInstance();
-            CalendarTooltipRenderer.render(client, matrixStack, tickDelta);
+            TooltipRenderer.render(client, matrixStack, tickDelta);
         }));
         FabricSeasonsExtrasPatchouliCompat.onInitializeClient();
     }

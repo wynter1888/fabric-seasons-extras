@@ -3,15 +3,21 @@ package io.github.lucaargolo.seasonsextras.item;
 import io.github.lucaargolo.seasons.FabricSeasons;
 import io.github.lucaargolo.seasons.utils.GreenhouseCache;
 import io.github.lucaargolo.seasons.utils.Season;
+import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,6 +25,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+//TODO: Translate these
 public class CropSeasonTesterItem extends Item {
 
     public CropSeasonTesterItem(Settings settings) {
@@ -28,26 +35,14 @@ public class CropSeasonTesterItem extends Item {
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
         if(!context.getWorld().isClient) {
-            LinkedHashSet<Season> greenHouseSeasons = new LinkedHashSet<>();
-            greenHouseSeasons.add(FabricSeasons.getCurrentSeason(context.getWorld()));
-            greenHouseSeasons.addAll(GreenhouseCache.test(context.getWorld(), context.getBlockPos().up()));
-            //TODO: Translate these
-            MutableText posInfo = Text.literal("Crops planted on this block will grow at their max speed during these seasons: ");
-            int i = 0;
-            for(Season season : greenHouseSeasons) {
-                posInfo.append(Text.translatable(season.getTranslationKey()).formatted(season.getDarkFormatting()));
-                if(i == greenHouseSeasons.size()-1) {
-                    posInfo.append(Text.literal(".").formatted(Formatting.RESET));
-                }else if(i == greenHouseSeasons.size()-2) {
-                    posInfo.append(Text.literal(" ").append(Text.translatable("patchouli.seasonsextras.and")).append(" ").formatted(Formatting.RESET));
-                }else{
-                    posInfo.append(Text.literal(", ").formatted(Formatting.RESET));
-                }
-                i++;
-            }
+            BlockPos blockPos = context.getBlockPos();
+            Season blockSeason = GreenhouseCache.test(context.getWorld(), blockPos.up());
             PlayerEntity player = context.getPlayer();
-            if(player != null) {
-                player.sendMessage(posInfo, false);
+            if(player instanceof ServerPlayerEntity serverPlayer) {
+                PacketByteBuf buf = PacketByteBufs.create();
+                buf.writeBlockPos(blockPos);
+                buf.writeEnumConstant(blockSeason);
+                ServerPlayNetworking.send(serverPlayer, FabricSeasonsExtras.SEND_TESTED_SEASON_S2C, buf);
             }
         }
         return ActionResult.SUCCESS;
@@ -56,6 +51,8 @@ public class CropSeasonTesterItem extends Item {
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
-        //TODO: Add these
+        tooltip.add(Text.literal("Shows which season is in action at the tested").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
+        tooltip.add(Text.literal("position. Useful for building greenhouses.").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
+
     }
 }
