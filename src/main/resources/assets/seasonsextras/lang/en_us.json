@@ -20,6 +20,7 @@
   "block.seasonsextras.red_greenhouse_glass": "Red Greenhouse Glass",
   "block.seasonsextras.white_greenhouse_glass": "White Greenhouse Glass",
   "block.seasonsextras.yellow_greenhouse_glass": "Yellow Greenhouse Glass",
+  "block.seasonsextras.tinted_greenhouse_glass": "Tinted Greenhouse Glass",
 
   "tooltip.seasonsextras.calendar_info_1": "It's currently ",
   "tooltip.seasonsextras.calendar_info_2": " days left to ",

@@ -65,10 +65,13 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
         });
         ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_TESTED_SEASON_S2C, (client, handler, buf, responseSender) -> {
             BlockPos receivedTestedPos = buf.readBlockPos();
+            boolean isSeasonIgnored = buf.readBoolean();
             Season receivedTestedSeason = buf.readEnumConstant(Season.class);
             client.execute(() -> {
                 testedPos = receivedTestedPos;
-                testedSeason = receivedTestedSeason;
+                if(!isSeasonIgnored) {
+                    testedSeason = receivedTestedSeason;
+                }
             });
         });
         ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_VALID_BIOMES_S2C, (client, handler, buf, responseSender) -> {

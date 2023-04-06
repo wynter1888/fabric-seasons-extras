@@ -18,6 +18,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,6 +42,7 @@ public class CropSeasonTesterItem extends Item {
             if(player instanceof ServerPlayerEntity serverPlayer) {
                 PacketByteBuf buf = PacketByteBufs.create();
                 buf.writeBlockPos(blockPos);
+                buf.writeBoolean(FabricSeasons.CONFIG.doCropsGrowsNormallyUnderground() && context.getWorld().getLightLevel(LightType.SKY, blockPos.up()) == 0);
                 buf.writeEnumConstant(blockSeason);
                 ServerPlayNetworking.send(serverPlayer, FabricSeasonsExtras.SEND_TESTED_SEASON_S2C, buf);
             }

@@ -50,15 +50,20 @@ public class TooltipRenderer {
 
     public static void renderTestedBlock(MinecraftClient client, MatrixStack matrixStack, BlockPos pos) {
         if(FabricSeasonsExtrasClient.testedPos != null) {
-            if(FabricSeasonsExtrasClient.testedPos.equals(pos) && FabricSeasonsExtrasClient.testedSeason != null) {
-                Season testedSeason = FabricSeasonsExtrasClient.testedSeason;
-                float scaleFactor = client.getWindow().calculateScaleFactor(client.options.getGuiScale().getValue(), client.forcesUnicodeFont());
-                int x = (int) (client.getWindow().getWidth()/(scaleFactor*2) - 24);
-                int y = (int) (client.getWindow().getHeight()/(scaleFactor*2) - 24);
-                DUMMY_SCREEN.init(client, client.getWindow().getScaledWidth(), client.getWindow().getScaledHeight());
+            if(FabricSeasonsExtrasClient.testedPos.equals(pos)) {
                 List<Text> lines = new ArrayList<>();
-                lines.add(Text.literal("Crops planted on this block will"));
-                lines.add(Text.literal("grow as if it were ").append(Text.translatable(testedSeason.getTranslationKey()).formatted(testedSeason.getFormatting())));
+                if(FabricSeasonsExtrasClient.testedSeason != null) {
+                    Season testedSeason = FabricSeasonsExtrasClient.testedSeason;
+                    lines.add(Text.literal("Crops planted on this block will"));
+                    lines.add(Text.literal("grow as if it were ").append(Text.translatable(testedSeason.getTranslationKey()).formatted(testedSeason.getFormatting())));
+                }else{
+                    lines.add(Text.literal("Crops planted on this block will"));
+                    lines.add(Text.literal("grow at their regular speed."));
+                }
+                float scaleFactor = client.getWindow().calculateScaleFactor(client.options.getGuiScale().getValue(), client.forcesUnicodeFont());
+                int x = (int) (client.getWindow().getWidth() / (scaleFactor * 2) - 24);
+                int y = (int) (client.getWindow().getHeight() / (scaleFactor * 2) - 24);
+                DUMMY_SCREEN.init(client, client.getWindow().getScaledWidth(), client.getWindow().getScaledHeight());
                 DUMMY_SCREEN.renderTooltip(matrixStack, lines, x, y);
             }else{
                 FabricSeasonsExtrasClient.testedPos = null;
