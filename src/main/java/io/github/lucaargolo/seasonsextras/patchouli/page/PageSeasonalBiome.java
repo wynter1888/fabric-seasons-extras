@@ -3,7 +3,7 @@ package io.github.lucaargolo.seasonsextras.patchouli.page;
 import com.google.gson.annotations.SerializedName;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.lucaargolo.seasons.utils.Season;
-import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
+import io.github.lucaargolo.seasonsextras.client.FabricSeasonsExtrasClient;
 import io.github.lucaargolo.seasonsextras.mixin.PageMultiblockAccessor;
 import io.github.lucaargolo.seasonsextras.utils.Tickable;
 import net.minecraft.client.MinecraftClient;

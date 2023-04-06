@@ -1,11 +1,6 @@
 package io.github.lucaargolo.seasonsextras.mixin;
 
-import io.github.lucaargolo.seasons.FabricSeasons;
-import io.github.lucaargolo.seasons.resources.FoliageSeasonColors;
-import io.github.lucaargolo.seasons.utils.ColorsCache;
-import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.Identifier;
+import io.github.lucaargolo.seasonsextras.client.FabricSeasonsExtrasClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;

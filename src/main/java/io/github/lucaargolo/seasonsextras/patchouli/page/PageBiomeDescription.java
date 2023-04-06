@@ -1,7 +1,7 @@
 package io.github.lucaargolo.seasonsextras.patchouli.page;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
+import io.github.lucaargolo.seasonsextras.client.FabricSeasonsExtrasClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;

@@ -20,7 +20,7 @@
       "io.github.lucaargolo.seasonsextras.FabricSeasonsExtras"
     ],
     "client": [
-      "io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient"
+      "io.github.lucaargolo.seasonsextras.client.FabricSeasonsExtrasClient"
     ]
   },
   "accessWidener": "seasonsextras.accesswidener",

@@ -2,13 +2,12 @@ package io.github.lucaargolo.seasonsextras.utils;
 
 import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
-import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
+import io.github.lucaargolo.seasonsextras.client.FabricSeasonsExtrasClient;
 import io.github.lucaargolo.seasonsextras.item.SeasonCalendarItem;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.hit.BlockHitResult;

@@ -1,10 +1,12 @@
-package io.github.lucaargolo.seasonsextras;
+package io.github.lucaargolo.seasonsextras.client;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.lucaargolo.seasons.FabricSeasons;
 import io.github.lucaargolo.seasons.utils.Season;
+import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
 import io.github.lucaargolo.seasonsextras.block.GreenhouseGlassBlock;
+import io.github.lucaargolo.seasonsextras.client.screen.AirConditioningScreen;
 import io.github.lucaargolo.seasonsextras.mixin.GuiBookEntryAccessor;
 import io.github.lucaargolo.seasonsextras.patchouli.FabricSeasonsExtrasPatchouliCompat;
 import io.github.lucaargolo.seasonsextras.utils.TooltipRenderer;
@@ -16,6 +18,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.world.ClientWorld;
@@ -152,6 +155,7 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
                 }
             }
         });
+        HandledScreens.register(FabricSeasonsExtras.AIR_CONDITIONING_SCREEN_HANDLER, AirConditioningScreen::new);
         for (GreenhouseGlassBlock block : FabricSeasonsExtras.GREENHOUSE_GLASS_BLOCKS) {
             BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getTranslucent());
         }

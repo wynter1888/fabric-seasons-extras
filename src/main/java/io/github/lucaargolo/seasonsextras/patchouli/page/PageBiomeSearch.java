@@ -1,6 +1,6 @@
 package io.github.lucaargolo.seasonsextras.patchouli.page;
 
-import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
+import io.github.lucaargolo.seasonsextras.client.FabricSeasonsExtrasClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.Text;

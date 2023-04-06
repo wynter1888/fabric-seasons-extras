@@ -3,9 +3,11 @@ package io.github.lucaargolo.seasonsextras;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import io.github.lucaargolo.seasons.FabricSeasons;
+import io.github.lucaargolo.seasonsextras.block.AirConditioningBlock;
 import io.github.lucaargolo.seasonsextras.block.GreenhouseGlassBlock;
 import io.github.lucaargolo.seasonsextras.block.SeasonCalendarBlock;
 import io.github.lucaargolo.seasonsextras.block.SeasonDetectorBlock;
+import io.github.lucaargolo.seasonsextras.blockentities.AirConditioningBlockEntity;
 import io.github.lucaargolo.seasonsextras.blockentities.GreenhouseGlassBlockEntity;
 import io.github.lucaargolo.seasonsextras.blockentities.SeasonCalendarBlockEntity;
 import io.github.lucaargolo.seasonsextras.blockentities.SeasonDetectorBlockEntity;
@@ -13,6 +15,7 @@ import io.github.lucaargolo.seasonsextras.item.GreenHouseGlassItem;
 import io.github.lucaargolo.seasonsextras.item.SeasonCalendarItem;
 import io.github.lucaargolo.seasonsextras.item.CropSeasonTesterItem;
 import io.github.lucaargolo.seasonsextras.item.SeasonalCompendiumItem;
+import io.github.lucaargolo.seasonsextras.screenhandlers.AirConditioningScreenHandler;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import io.github.lucaargolo.seasonsextras.patchouli.PatchouliMultiblockCreator;
 import net.fabricmc.api.ModInitializer;
@@ -21,17 +24,25 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.tag.BlockTags;
+import net.minecraft.text.Text;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -56,6 +67,7 @@ public class FabricSeasonsExtras implements ModInitializer {
     public static BlockEntityType<SeasonDetectorBlockEntity> SEASON_DETECTOR_TYPE = null;
     public static BlockEntityType<SeasonCalendarBlockEntity> SEASON_CALENDAR_TYPE = null;
     public static BlockEntityType<GreenhouseGlassBlockEntity> GREENHOUSE_GLASS_TYPE = null;
+    public static BlockEntityType<AirConditioningBlockEntity> AIR_CONDITIONING_TYPE = null;
 
     //Blocks
     public static SeasonCalendarBlock SEASON_CALENDAR_BLOCK;
@@ -64,6 +76,9 @@ public class FabricSeasonsExtras implements ModInitializer {
     //Items
     public static ModIdentifier SEASONAL_COMPENDIUM_ITEM_ID = new ModIdentifier("seasonal_compendium");
     public static Item SEASON_CALENDAR_ITEM;
+
+    //Screen Handlers
+    public static ScreenHandlerType<AirConditioningScreenHandler> AIR_CONDITIONING_SCREEN_HANDLER;
 
     //Packets
     public static ModIdentifier SEND_VALID_BIOMES_S2C = new ModIdentifier("send_valid_biomes_s2c");
@@ -95,7 +110,18 @@ public class FabricSeasonsExtras implements ModInitializer {
         GREENHOUSE_GLASS_BLOCKS[16] = tintedGreenhouseGlass;
         GREENHOUSE_GLASS_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, new ModIdentifier("greenhouse_glass"), FabricBlockEntityTypeBuilder.create(GreenhouseGlassBlockEntity::new, GREENHOUSE_GLASS_BLOCKS).build(null));
 
+        AirConditioningBlock heaterBlock = Registry.register(Registry.BLOCK, new ModIdentifier("heater"), new AirConditioningBlock("heater", FabricBlockSettings.copyOf(Blocks.COBBLESTONE)));
+        Registry.register(Registry.ITEM, new ModIdentifier("heater"), new BlockItem(heaterBlock, new Item.Settings().group(ItemGroup.DECORATIONS)));
+        AirConditioningBlock chillerBlock = Registry.register(Registry.BLOCK, new ModIdentifier("chiller"), new AirConditioningBlock("chiller", FabricBlockSettings.copyOf(Blocks.IRON_BLOCK)));
+        Registry.register(Registry.ITEM, new ModIdentifier("chiller"), new BlockItem(chillerBlock, new Item.Settings().group(ItemGroup.DECORATIONS)));
+        AIR_CONDITIONING_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, new ModIdentifier("air_conditioning"), FabricBlockEntityTypeBuilder.create(AirConditioningBlockEntity::new, heaterBlock, chillerBlock).build(null));
+
+        AIR_CONDITIONING_SCREEN_HANDLER = Registry.register(Registry.SCREEN_HANDLER, new ModIdentifier("air_conditioning_screen"), new ExtendedScreenHandlerType<>((syncId, playerInventory, buf) -> {
+            return new AirConditioningScreenHandler(syncId, playerInventory, ScreenHandlerContext.create(playerInventory.player.world, buf.readBlockPos()), buf.readRegistryValue(Registry.BLOCK));
+        }));
+
         Registry.register(Registry.ITEM, new ModIdentifier("crop_season_tester"), new CropSeasonTesterItem(new Item.Settings().group(ItemGroup.REDSTONE)));
+
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             sendValidBiomes(server, handler.player);

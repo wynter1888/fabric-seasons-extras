@@ -1,7 +1,6 @@
 package io.github.lucaargolo.seasonsextras.patchouli.page;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import io.github.lucaargolo.seasonsextras.FabricSeasonsExtrasClient;
 import io.github.lucaargolo.seasonsextras.mixed.FontManagerMixed;
 import io.github.lucaargolo.seasonsextras.mixin.MinecraftClientAccessor;
 import io.github.lucaargolo.seasonsextras.utils.Tickable;
@@ -10,21 +9,17 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.World;
 import vazkii.patchouli.client.book.gui.BookTextRenderer;
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.client.book.gui.GuiBookEntry;
 import vazkii.patchouli.client.book.page.PageText;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
