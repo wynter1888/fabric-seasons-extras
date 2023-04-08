@@ -1,29 +1,22 @@
 package io.github.lucaargolo.seasonsextras.blockentities;
 
-import io.github.lucaargolo.seasons.FabricSeasons;
-import io.github.lucaargolo.seasons.utils.GreenhouseCache;
-import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
-import io.github.lucaargolo.seasonsextras.block.GreenhouseGlassBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public class AirConditioningBlockEntity extends BlockEntity {
 
     private int progress = 0;
+    private Conditioning conditioning;
+
     private final SimpleInventory inputInventory = new SimpleInventory(9) {
         @Override
         public void markDirty() {
@@ -53,30 +46,33 @@ public class AirConditioningBlockEntity extends BlockEntity {
                     return AirConditioningBlockEntity.this.progress;
                 }
                 case 1 -> {
-                    return AirConditioningBlockEntity.this.modules[0].enabled ? 1 : 0;
+                    return AirConditioningBlockEntity.this.conditioning.ordinal();
                 }
                 case 2 -> {
-                    return AirConditioningBlockEntity.this.modules[0].burnTime;
+                    return AirConditioningBlockEntity.this.modules[0].enabled ? 1 : 0;
                 }
                 case 3 -> {
-                    return AirConditioningBlockEntity.this.modules[0].burnTimeTotal;
+                    return AirConditioningBlockEntity.this.modules[0].burnTime;
                 }
                 case 4 -> {
-                    return AirConditioningBlockEntity.this.modules[1].enabled ? 1 : 0;
+                    return AirConditioningBlockEntity.this.modules[0].burnTimeTotal;
                 }
                 case 5 -> {
-                    return AirConditioningBlockEntity.this.modules[1].burnTime;
+                    return AirConditioningBlockEntity.this.modules[1].enabled ? 1 : 0;
                 }
                 case 6 -> {
-                    return AirConditioningBlockEntity.this.modules[1].burnTimeTotal;
+                    return AirConditioningBlockEntity.this.modules[1].burnTime;
                 }
                 case 7 -> {
-                    return AirConditioningBlockEntity.this.modules[2].enabled ? 1: 0;
+                    return AirConditioningBlockEntity.this.modules[1].burnTimeTotal;
                 }
                 case 8 -> {
-                    return AirConditioningBlockEntity.this.modules[2].burnTime;
+                    return AirConditioningBlockEntity.this.modules[2].enabled ? 1: 0;
                 }
                 case 9 -> {
+                    return AirConditioningBlockEntity.this.modules[2].burnTime;
+                }
+                case 10 -> {
                     return AirConditioningBlockEntity.this.modules[2].burnTimeTotal;
                 }
             }
@@ -84,45 +80,27 @@ public class AirConditioningBlockEntity extends BlockEntity {
         }
 
         @Override
-        public void set(int index, int value) {
-            switch (index) {
-                case 0 -> {
-                    AirConditioningBlockEntity.this.progress = value;
-                }
-                case 1 -> {
-                    AirConditioningBlockEntity.this.modules[0].burnTime = value;
-                }
-                case 2 -> {
-                    AirConditioningBlockEntity.this.modules[0].burnTimeTotal = value;
-                }
-                case 3 -> {
-                    AirConditioningBlockEntity.this.modules[1].burnTime = value;
-                }
-                case 4 -> {
-                    AirConditioningBlockEntity.this.modules[1].burnTimeTotal = value;
-                }
-                case 5 -> {
-                    AirConditioningBlockEntity.this.modules[2].burnTime = value;
-                }
-                case 6 -> {
-                    AirConditioningBlockEntity.this.modules[2].burnTimeTotal = value;
-                }
-            }
-        }
+        public void set(int index, int value) { }
 
         @Override
         public int size() {
-            return 10;
+            return 11;
         }
     };
 
-    public AirConditioningBlockEntity(BlockPos pos, BlockState state) {
+    public AirConditioningBlockEntity(BlockPos pos, BlockState state, Conditioning conditioning) {
         super(FabricSeasonsExtras.AIR_CONDITIONING_TYPE, pos, state);
+        this.conditioning = conditioning;
+    }
+
+    public AirConditioningBlockEntity(BlockPos pos, BlockState state) {
+        this(pos, state, Conditioning.HEATER);
     }
 
     @Override
     protected void writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
+        nbt.putInt("conditioning", conditioning.ordinal());
         nbt.putInt("progress", progress);
         Inventories.writeNbt(nbt, inputInventory.stacks);
         for (int i = 0 ; i < modules.length; i++) {
@@ -133,6 +111,7 @@ public class AirConditioningBlockEntity extends BlockEntity {
     @Override
     public void readNbt(NbtCompound nbt) {
         super.readNbt(nbt);
+        conditioning = Conditioning.values()[Math.max(0, Math.min(Conditioning.values().length, nbt.getInt("conditioning")))];
         progress = nbt.getInt("progress");
         Inventories.readNbt(nbt, inputInventory.stacks);
         for (int i = 0 ; i < modules.length; i++) {
@@ -152,19 +131,20 @@ public class AirConditioningBlockEntity extends BlockEntity {
         return this.moduleInventory;
     }
 
+    public void cycleModule(int module) {
+        modules[module].enabled = !modules[module].enabled;
+        markDirty();
+    }
+
     public static void serverTick(World world, BlockPos pos, BlockState state, AirConditioningBlockEntity entity) {
 
-        entity.progress += 4;
-        int maxProgress = 28+13;
-        if(entity.modules[2].enabled) {
-            maxProgress = 64+13;
-        }else if(entity.modules[1].enabled) {
-            maxProgress = 46+13;
-        }else if(!entity.modules[0].enabled) {
-            maxProgress = 0;
-        }
-        if(entity.progress > maxProgress) {
+        int maxProgress = getMaxProgress(entity.modules);
+        if(entity.progress >= maxProgress) {
+            entity.progress = 0;
+        }else if(entity.progress + 3 > maxProgress) {
             entity.progress = maxProgress;
+        }else{
+            entity.progress += 3;
         }
 
         for (int i = 0 ; i < entity.modules.length; i++) {
@@ -178,10 +158,18 @@ public class AirConditioningBlockEntity extends BlockEntity {
             }
         }
 
-        if(entity.progress == maxProgress) {
-            entity.progress = 0;
-        }
+    }
 
+    public static int getMaxProgress(Module[] modules) {
+        int maxProgress = 28+13;
+        if(modules[2].enabled) {
+            maxProgress = 64+13;
+        }else if(modules[1].enabled) {
+            maxProgress = 46+13;
+        }else if(!modules[0].enabled) {
+            maxProgress = 0;
+        }
+        return maxProgress;
     }
 
     public static class Module {
@@ -213,6 +201,11 @@ public class AirConditioningBlockEntity extends BlockEntity {
             return nbt;
         }
 
+    }
+
+    public enum Conditioning {
+        HEATER,
+        CHILLER;
     }
 
 }

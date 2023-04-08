@@ -85,7 +85,7 @@ public class FabricSeasonsExtras implements ModInitializer {
     public static ModIdentifier SEND_BIOME_MULTIBLOCKS_S2C = new ModIdentifier("send_biome_multiblocks_s2c");
     public static ModIdentifier SEND_MULTIBLOCKS_S2C = new ModIdentifier("send_multiblocks_s2c");
     public static ModIdentifier SEND_TESTED_SEASON_S2C = new ModIdentifier("send_tested_season_s2c");
-
+    public static ModIdentifier SEND_MODULE_PRESS_C2S = new ModIdentifier("send_module_press_c2s");
 
 
     @Override
@@ -110,9 +110,9 @@ public class FabricSeasonsExtras implements ModInitializer {
         GREENHOUSE_GLASS_BLOCKS[16] = tintedGreenhouseGlass;
         GREENHOUSE_GLASS_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, new ModIdentifier("greenhouse_glass"), FabricBlockEntityTypeBuilder.create(GreenhouseGlassBlockEntity::new, GREENHOUSE_GLASS_BLOCKS).build(null));
 
-        AirConditioningBlock heaterBlock = Registry.register(Registry.BLOCK, new ModIdentifier("heater"), new AirConditioningBlock("heater", FabricBlockSettings.copyOf(Blocks.COBBLESTONE)));
+        AirConditioningBlock heaterBlock = Registry.register(Registry.BLOCK, new ModIdentifier("heater"), new AirConditioningBlock(AirConditioningBlockEntity.Conditioning.HEATER, FabricBlockSettings.copyOf(Blocks.COBBLESTONE)));
         Registry.register(Registry.ITEM, new ModIdentifier("heater"), new BlockItem(heaterBlock, new Item.Settings().group(ItemGroup.DECORATIONS)));
-        AirConditioningBlock chillerBlock = Registry.register(Registry.BLOCK, new ModIdentifier("chiller"), new AirConditioningBlock("chiller", FabricBlockSettings.copyOf(Blocks.IRON_BLOCK)));
+        AirConditioningBlock chillerBlock = Registry.register(Registry.BLOCK, new ModIdentifier("chiller"), new AirConditioningBlock(AirConditioningBlockEntity.Conditioning.CHILLER, FabricBlockSettings.copyOf(Blocks.IRON_BLOCK)));
         Registry.register(Registry.ITEM, new ModIdentifier("chiller"), new BlockItem(chillerBlock, new Item.Settings().group(ItemGroup.DECORATIONS)));
         AIR_CONDITIONING_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, new ModIdentifier("air_conditioning"), FabricBlockEntityTypeBuilder.create(AirConditioningBlockEntity::new, heaterBlock, chillerBlock).build(null));
 
@@ -122,9 +122,17 @@ public class FabricSeasonsExtras implements ModInitializer {
 
         Registry.register(Registry.ITEM, new ModIdentifier("crop_season_tester"), new CropSeasonTesterItem(new Item.Settings().group(ItemGroup.REDSTONE)));
 
-
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             sendValidBiomes(server, handler.player);
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(SEND_MODULE_PRESS_C2S, (server, player, handler, buf, sender) -> {
+            int module = buf.readInt();
+            server.execute(() -> {
+                if(player.currentScreenHandler instanceof AirConditioningScreenHandler screenHandler) {
+                    screenHandler.cycleModule(module);
+                }
+            });
         });
     }
 

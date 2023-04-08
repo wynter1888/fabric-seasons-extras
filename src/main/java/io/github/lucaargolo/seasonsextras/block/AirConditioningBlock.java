@@ -36,16 +36,16 @@ import java.util.Optional;
 @SuppressWarnings("deprecation")
 public class AirConditioningBlock extends BlockWithEntity {
 
-    public final String type;
+    private final AirConditioningBlockEntity.Conditioning conditioning;
 
-    public AirConditioningBlock(String type, Settings settings) {
+    public AirConditioningBlock(AirConditioningBlockEntity.Conditioning conditioning, Settings settings) {
         super(settings);
-        this.type = type;
+        this.conditioning = conditioning;
     }
 
     @Override
     public AirConditioningBlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new AirConditioningBlockEntity(pos, state);
+        return new AirConditioningBlockEntity(pos, state, conditioning);
     }
 
     @Override
