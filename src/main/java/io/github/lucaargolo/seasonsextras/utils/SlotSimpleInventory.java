@@ -11,25 +11,22 @@ import java.util.stream.Collectors;
 public class SlotSimpleInventory implements Inventory {
 
     private final SimpleInventory inventory;
-    private final Set<Integer> slots;
+    private final int[] slots;
 
     public SlotSimpleInventory(SimpleInventory inventory, int... slots) {
         this.inventory = inventory;
-        this.slots = Arrays.stream(slots).boxed().collect(Collectors.toSet());
+        this.slots = slots;
     }
 
     @Override
     public int size() {
-        return inventory.size();
+        return slots.length;
     }
 
     public boolean isEmpty() {
-        Iterator<ItemStack> var1 = inventory.stacks.iterator();
-
-        int index = 0;
-        while (var1.hasNext()) {
-            ItemStack stack = var1.next();
-            if(slots.contains(index) && !stack.isEmpty()) {
+        for (int slot : slots) {
+            ItemStack stack = getStack(slot);
+            if (!stack.isEmpty()) {
                 return false;
             }
         }
@@ -38,24 +35,22 @@ public class SlotSimpleInventory implements Inventory {
 
     @Override
     public ItemStack getStack(int slot) {
-        return slots.contains(slot) ? inventory.getStack(slot) : ItemStack.EMPTY;
+        return inventory.getStack(slots[slot]);
     }
 
     @Override
     public ItemStack removeStack(int slot, int amount) {
-        return slots.contains(slot) ? inventory.removeStack(slot, amount) : ItemStack.EMPTY;
+        return inventory.removeStack(slots[slot], amount);
     }
 
     @Override
     public ItemStack removeStack(int slot) {
-        return slots.contains(slot) ? inventory.removeStack(slot) : ItemStack.EMPTY;
+        return inventory.removeStack(slots[slot]);
     }
 
     @Override
     public void setStack(int slot, ItemStack stack) {
-        if(slots.contains(slot)) {
-            inventory.setStack(slot, stack);
-        }
+        inventory.setStack(slots[slot], stack);
     }
 
     @Override
@@ -70,14 +65,8 @@ public class SlotSimpleInventory implements Inventory {
 
     @Override
     public void clear() {
-        ListIterator<ItemStack> var1 = inventory.stacks.listIterator();
-
-        int index = 0;
-        while (var1.hasNext()){
-            if (slots.contains(index)) {
-                var1.set(ItemStack.EMPTY);
-            }
-            index++;
+        for (int slot : slots) {
+            setStack(slot, ItemStack.EMPTY);
         }
     }
 }

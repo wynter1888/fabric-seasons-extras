@@ -3,6 +3,7 @@ package io.github.lucaargolo.seasonsextras.screenhandlers;
 
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
 import io.github.lucaargolo.seasonsextras.blockentities.AirConditioningBlockEntity;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -18,8 +19,6 @@ import java.util.Optional;
 
 public class AirConditioningScreenHandler extends ScreenHandler {
 
-    private final Inventory inputInventory;
-    private final Inventory moduleInventory;
     private final PropertyDelegate propertyDelegate;
     private final ScreenHandlerContext context;
 
@@ -37,8 +36,6 @@ public class AirConditioningScreenHandler extends ScreenHandler {
         AbstractFurnaceScreenHandler.checkSize(inputInventory, 9);
         AbstractFurnaceScreenHandler.checkSize(moduleInventory, 3);
         AbstractFurnaceScreenHandler.checkDataCount(propertyDelegate, 11);
-        this.inputInventory = inputInventory;
-        this.moduleInventory = moduleInventory;
         this.propertyDelegate = propertyDelegate;
         for (i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
@@ -88,7 +85,25 @@ public class AirConditioningScreenHandler extends ScreenHandler {
 
     @Override
     public ItemStack transferSlot(PlayerEntity player, int index) {
-        return ItemStack.EMPTY;
+        ItemStack itemStack = ItemStack.EMPTY;
+        Slot slot = this.slots.get(index);
+        if (slot.hasStack()) {
+            ItemStack itemStack2 = slot.getStack();
+            itemStack = itemStack2.copy();
+            if (index < 12 ? !this.insertItem(itemStack2, 12, 48, true) : !this.insertItem(itemStack2, 0, 12, false)) {
+                return ItemStack.EMPTY;
+            }
+            if (itemStack2.isEmpty()) {
+                slot.setStack(ItemStack.EMPTY);
+            } else {
+                slot.markDirty();
+            }
+            if (itemStack2.getCount() == itemStack.getCount()) {
+                return ItemStack.EMPTY;
+            }
+            slot.onTakeItem(player, itemStack2);
+        }
+        return itemStack;
     }
 
     @Override
@@ -102,15 +117,11 @@ public class AirConditioningScreenHandler extends ScreenHandler {
             super(inventory, index, x, y);
         }
 
+        @SuppressWarnings("UnstableApiUsage")
         @Override
         public boolean canInsert(ItemStack stack) {
             AirConditioningBlockEntity.Conditioning conditioning = AirConditioningScreenHandler.this.getConditioning();
-            if(conditioning == AirConditioningBlockEntity.Conditioning.HEATER) {
-                return AbstractFurnaceBlockEntity.canUseAsFuel(stack);
-            }else{
-                //TODO: Chiller fuel;
-                return false;
-            }
+            return conditioning.getFilter().test(ItemVariant.of(stack));
         }
     }
 

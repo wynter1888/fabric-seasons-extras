@@ -1,13 +1,16 @@
 package io.github.lucaargolo.seasonsextras.blockentities;
 
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
+import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import io.github.lucaargolo.seasonsextras.utils.SlotSimpleInventory;
+import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.inventory.Inventories;
@@ -16,9 +19,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PropertyDelegate;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class AirConditioningBlockEntity extends BlockEntity {
@@ -159,33 +164,32 @@ public class AirConditioningBlockEntity extends BlockEntity {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public static void serverTick(World world, BlockPos pos, BlockState state, AirConditioningBlockEntity entity) {
-
-        if(entity.halt) {
-            entity.progress = 0;
-            entity.lastProgress = 0;
-            return;
-        }
-
-        Storage<ItemVariant> inputStorage = InventoryStorage.of(entity.inputInventory, null);
-
-        Predicate<ItemVariant> filter = itemVariant -> {
-            ItemStack stack = itemVariant.toStack();
-            //TODO: Fix this
-            return AbstractFurnaceBlockEntity.canUseAsFuel(stack);
-        };
-
+    private void updateHalt(Storage<ItemVariant> inputStorage, Predicate<ItemVariant> filter) {
         ItemVariant variant;
         try(Transaction transaction = Transaction.openOuter()) {
             variant = StorageUtil.findExtractableResource(inputStorage, filter, transaction);
             if (variant == null || variant.isBlank()) {
-                entity.halt = true;
+                halt = true;
             }
             transaction.commit();
         }
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private void updateHalt() {
+        Storage<ItemVariant> inputStorage = InventoryStorage.of(inputInventory, null);
+        Predicate<ItemVariant> filter = conditioning.getFilter();
+        updateHalt(inputStorage, filter);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void serverTick(World world, BlockPos pos, BlockState state, AirConditioningBlockEntity entity) {
+        Storage<ItemVariant> inputStorage = InventoryStorage.of(entity.inputInventory, null);
+        Predicate<ItemVariant> filter = entity.conditioning.getFilter();
+        entity.updateHalt(inputStorage, filter);
 
         int maxProgress = getMaxProgress(entity.modules);
-        if(entity.progress >= maxProgress) {
+        if(entity.halt || entity.progress >= maxProgress) {
             entity.progress = 0;
         }else if(entity.progress + 3 > maxProgress) {
             entity.progress = maxProgress;
@@ -201,7 +205,7 @@ public class AirConditioningBlockEntity extends BlockEntity {
 
                 try(Transaction transaction = Transaction.openOuter()) {
                     StorageUtil.move(inputStorage, moduleStorage, filter, 1, transaction);
-                    variant = StorageUtil.findExtractableResource(inputStorage, filter, transaction);
+                    ItemVariant variant = StorageUtil.findExtractableResource(inputStorage, filter, transaction);
                     if (variant == null || variant.isBlank()) {
                         entity.halt = true;
                     }
@@ -211,7 +215,6 @@ public class AirConditioningBlockEntity extends BlockEntity {
         }
 
         entity.lastProgress = entity.progress;
-
     }
 
     public static int getMaxProgress(Module[] modules) {
@@ -254,8 +257,41 @@ public class AirConditioningBlockEntity extends BlockEntity {
     }
 
     public enum Conditioning {
-        HEATER,
-        CHILLER;
+        HEATER(new ModIdentifier("textures/gui/heater.png"), stack -> FuelRegistry.INSTANCE.get(stack.getItem())),
+        CHILLER(new ModIdentifier("textures/gui/chiller.png"), stack -> {
+            if(stack.isOf(Items.POWDER_SNOW_BUCKET)) return 20;
+            if(stack.isOf(Items.SNOW_BLOCK)) return 20;
+            if(stack.isOf(Items.PACKED_ICE)) return 360;
+            if(stack.isOf(Items.BLUE_ICE)) return 3240;
+            if(stack.isOf(Items.SNOWBALL)) return 5;
+            if(stack.isOf(Items.SNOW)) return 10;
+            if(stack.isOf(Items.ICE)) return 40;
+            return 0;
+        });
+
+        private final Identifier texture;
+        private final Function<ItemStack, Integer> fuel;
+
+        Conditioning(Identifier texture, Function<ItemStack, Integer> fuel) {
+            this.texture = texture;
+            this.fuel = fuel;
+        }
+
+        public Identifier getTexture() {
+            return texture;
+        }
+
+        public Function<ItemStack, Integer> getFuel() {
+            return fuel;
+        }
+
+        @SuppressWarnings("UnstableApiUsage")
+        public Predicate<ItemVariant> getFilter() {
+            return variant -> {
+                Integer fuelTime = fuel.apply(variant.toStack());
+                return fuelTime != null && fuelTime > 0;
+            };
+        }
     }
 
 }

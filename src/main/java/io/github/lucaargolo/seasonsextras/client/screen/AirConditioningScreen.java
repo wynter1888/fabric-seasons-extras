@@ -17,9 +17,6 @@ import net.minecraft.util.math.MathHelper;
 
 public class AirConditioningScreen extends HandledScreen<AirConditioningScreenHandler> {
 
-    private static final Identifier HEATER_TEXTURE = new ModIdentifier("textures/gui/heater.png");
-    private static final Identifier CHILLER_TEXTURE = new ModIdentifier("textures/gui/chiller.png");
-
     private final int[] pressedTime = new int[] { 0, 0, 0 };
     private int lastProgress = 0;
 
@@ -36,7 +33,7 @@ public class AirConditioningScreen extends HandledScreen<AirConditioningScreenHa
 
     @Override
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
-        RenderSystem.setShaderTexture(0, getTexture());
+        RenderSystem.setShaderTexture(0, handler.getConditioning().getTexture());
         this.drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
         AirConditioningBlockEntity.Module[] modules = handler.getModules();
         float lerpProgress = MathHelper.lerp(delta, lastProgress, handler.getProgress());
@@ -52,7 +49,7 @@ public class AirConditioningScreen extends HandledScreen<AirConditioningScreenHa
 
     @Override
     protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
-        RenderSystem.setShaderTexture(0, getTexture());
+        RenderSystem.setShaderTexture(0, handler.getConditioning().getTexture());
         AirConditioningBlockEntity.Module[] modules = handler.getModules();
         for(int i = 0; i < modules.length; i++) {
             this.drawTexture(matrices, 102+(18*i), 59, modules[i].enabled ? 176 : 183,  pressedTime[i] == 0 ? 14 : 21, 7, 7);
@@ -86,11 +83,4 @@ public class AirConditioningScreen extends HandledScreen<AirConditioningScreenHa
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    private Identifier getTexture() {
-        if(handler.getConditioning() == AirConditioningBlockEntity.Conditioning.CHILLER) {
-            return CHILLER_TEXTURE;
-        }else{
-            return HEATER_TEXTURE;
-        }
-    }
 }
