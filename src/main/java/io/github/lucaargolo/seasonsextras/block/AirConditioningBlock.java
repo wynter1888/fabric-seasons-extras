@@ -2,7 +2,7 @@ package io.github.lucaargolo.seasonsextras.block;
 
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
 import io.github.lucaargolo.seasonsextras.blockentities.AirConditioningBlockEntity;
-import io.github.lucaargolo.seasonsextras.blockentities.GreenhouseGlassBlockEntity;
+import io.github.lucaargolo.seasonsextras.blockentities.AirConditioningBlockEntity.*;
 import io.github.lucaargolo.seasonsextras.screenhandlers.AirConditioningScreenHandler;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockRenderType;
@@ -36,9 +36,9 @@ import java.util.Optional;
 @SuppressWarnings("deprecation")
 public class AirConditioningBlock extends BlockWithEntity {
 
-    private final AirConditioningBlockEntity.Conditioning conditioning;
+    private final Conditioning conditioning;
 
-    public AirConditioningBlock(AirConditioningBlockEntity.Conditioning conditioning, Settings settings) {
+    public AirConditioningBlock(Conditioning conditioning, Settings settings) {
         super(settings);
         this.conditioning = conditioning;
     }

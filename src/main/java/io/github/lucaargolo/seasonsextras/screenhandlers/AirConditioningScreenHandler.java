@@ -3,16 +3,15 @@ package io.github.lucaargolo.seasonsextras.screenhandlers;
 
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
 import io.github.lucaargolo.seasonsextras.blockentities.AirConditioningBlockEntity;
+import io.github.lucaargolo.seasonsextras.blockentities.AirConditioningBlockEntity.*;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.block.Block;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.*;
-import net.minecraft.screen.slot.FurnaceFuelSlot;
 import net.minecraft.screen.slot.Slot;
 
 import java.util.Optional;
@@ -25,7 +24,7 @@ public class AirConditioningScreenHandler extends ScreenHandler {
     private final Block block;
 
     public AirConditioningScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, Block block) {
-        this(syncId, playerInventory, context, block, new SimpleInventory(9), new SimpleInventory(3), new ArrayPropertyDelegate(11));
+        this(syncId, playerInventory, context, block, new SimpleInventory(9), new SimpleInventory(3), new ArrayPropertyDelegate(12));
     }
 
     public AirConditioningScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, Block block, Inventory inputInventory, Inventory moduleInventory, PropertyDelegate propertyDelegate) {
@@ -35,7 +34,7 @@ public class AirConditioningScreenHandler extends ScreenHandler {
         this.block = block;
         AbstractFurnaceScreenHandler.checkSize(inputInventory, 9);
         AbstractFurnaceScreenHandler.checkSize(moduleInventory, 3);
-        AbstractFurnaceScreenHandler.checkDataCount(propertyDelegate, 11);
+        AbstractFurnaceScreenHandler.checkDataCount(propertyDelegate, 12);
         this.propertyDelegate = propertyDelegate;
         for (i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
@@ -56,21 +55,25 @@ public class AirConditioningScreenHandler extends ScreenHandler {
         this.addProperties(propertyDelegate);
     }
 
-    public AirConditioningBlockEntity.Conditioning getConditioning() {
-        return AirConditioningBlockEntity.Conditioning.values()[Math.max(0, Math.min(AirConditioningBlockEntity.Conditioning.values().length, propertyDelegate.get(1)))];
-    }
-
     public int getProgress() {
         return propertyDelegate.get(0);
     }
 
-    public AirConditioningBlockEntity.Module[] getModules() {
-        AirConditioningBlockEntity.Module[] modules = new AirConditioningBlockEntity.Module[3];
+    public Conditioning getConditioning() {
+        return Conditioning.values()[Math.max(0, Math.min(Conditioning.values().length, propertyDelegate.get(1)))];
+    }
+
+    public int getLevel() {
+        return propertyDelegate.get(2);
+    }
+
+    public BurnSlot[] getBurnSlots() {
+        BurnSlot[] burnSlots = new BurnSlot[3];
         for(int index = 0; index < 3; index++) {
-            int i = (index * 3) + 2;
-            modules[index] = new AirConditioningBlockEntity.Module(propertyDelegate.get(i) != 0, propertyDelegate.get(i+1), propertyDelegate.get(i+2));
+            int i = (index * 3) + 3;
+            burnSlots[index] = new BurnSlot(propertyDelegate.get(i) != 0, propertyDelegate.get(i+1), propertyDelegate.get(i+2));
         }
-        return modules;
+        return burnSlots;
     }
 
     public void cycleModule(int module) {
@@ -120,7 +123,7 @@ public class AirConditioningScreenHandler extends ScreenHandler {
         @SuppressWarnings("UnstableApiUsage")
         @Override
         public boolean canInsert(ItemStack stack) {
-            AirConditioningBlockEntity.Conditioning conditioning = AirConditioningScreenHandler.this.getConditioning();
+            Conditioning conditioning = AirConditioningScreenHandler.this.getConditioning();
             return conditioning.getFilter().test(ItemVariant.of(stack));
         }
     }

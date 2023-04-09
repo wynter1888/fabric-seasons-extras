@@ -10,8 +10,6 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SimpleInventory;
@@ -30,6 +28,8 @@ public class AirConditioningBlockEntity extends BlockEntity {
 
     private int lastProgress = 0;
     private int progress = 0;
+
+    private int level = 0;
     private boolean halt = false;
     private Conditioning conditioning;
 
@@ -52,10 +52,10 @@ public class AirConditioningBlockEntity extends BlockEntity {
     };
 
 
-    private final Module[] modules = new Module[] {
-        new Module(true, 0, 0),
-        new Module(false, 0, 0),
-        new Module(false, 0, 0)
+    private final BurnSlot[] burnSlots = new BurnSlot[] {
+        new BurnSlot(true, 0, 0),
+        new BurnSlot(false, 0, 0),
+        new BurnSlot(false, 0, 0)
     };
 
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
@@ -70,31 +70,34 @@ public class AirConditioningBlockEntity extends BlockEntity {
                     return AirConditioningBlockEntity.this.conditioning.ordinal();
                 }
                 case 2 -> {
-                    return AirConditioningBlockEntity.this.modules[0].enabled ? 1 : 0;
+                    return AirConditioningBlockEntity.this.level;
                 }
                 case 3 -> {
-                    return AirConditioningBlockEntity.this.modules[0].burnTime;
+                    return AirConditioningBlockEntity.this.burnSlots[0].enabled ? 1 : 0;
                 }
                 case 4 -> {
-                    return AirConditioningBlockEntity.this.modules[0].burnTimeTotal;
+                    return AirConditioningBlockEntity.this.burnSlots[0].burnTime;
                 }
                 case 5 -> {
-                    return AirConditioningBlockEntity.this.modules[1].enabled ? 1 : 0;
+                    return AirConditioningBlockEntity.this.burnSlots[0].burnTimeTotal;
                 }
                 case 6 -> {
-                    return AirConditioningBlockEntity.this.modules[1].burnTime;
+                    return AirConditioningBlockEntity.this.burnSlots[1].enabled ? 1 : 0;
                 }
                 case 7 -> {
-                    return AirConditioningBlockEntity.this.modules[1].burnTimeTotal;
+                    return AirConditioningBlockEntity.this.burnSlots[1].burnTime;
                 }
                 case 8 -> {
-                    return AirConditioningBlockEntity.this.modules[2].enabled ? 1: 0;
+                    return AirConditioningBlockEntity.this.burnSlots[1].burnTimeTotal;
                 }
                 case 9 -> {
-                    return AirConditioningBlockEntity.this.modules[2].burnTime;
+                    return AirConditioningBlockEntity.this.burnSlots[2].enabled ? 1: 0;
                 }
                 case 10 -> {
-                    return AirConditioningBlockEntity.this.modules[2].burnTimeTotal;
+                    return AirConditioningBlockEntity.this.burnSlots[2].burnTime;
+                }
+                case 11 -> {
+                    return AirConditioningBlockEntity.this.burnSlots[2].burnTimeTotal;
                 }
             }
             return 0;
@@ -105,7 +108,7 @@ public class AirConditioningBlockEntity extends BlockEntity {
 
         @Override
         public int size() {
-            return 11;
+            return 12;
         }
     };
 
@@ -129,8 +132,8 @@ public class AirConditioningBlockEntity extends BlockEntity {
         NbtCompound moduleInventoryNbt = new NbtCompound();
         Inventories.writeNbt(moduleInventoryNbt, moduleInventory.stacks);
         nbt.put("moduleInventory", moduleInventoryNbt);
-        for (int i = 0 ; i < modules.length; i++) {
-            nbt.put("module_" + i, modules[i].writeNbt(new NbtCompound()));
+        for (int i = 0; i < burnSlots.length; i++) {
+            nbt.put("module_" + i, burnSlots[i].writeNbt(new NbtCompound()));
         }
     }
 
@@ -141,8 +144,8 @@ public class AirConditioningBlockEntity extends BlockEntity {
         progress = nbt.getInt("progress");
         Inventories.readNbt(nbt.getCompound("inputInventory"), inputInventory.stacks);
         Inventories.readNbt(nbt.getCompound("moduleInventory"), moduleInventory.stacks);
-        for (int i = 0 ; i < modules.length; i++) {
-            modules[i].readNbt(nbt.getCompound("module_" + i));
+        for (int i = 0; i < burnSlots.length; i++) {
+            burnSlots[i].readNbt(nbt.getCompound("module_" + i));
         }
     }
 
@@ -159,7 +162,7 @@ public class AirConditioningBlockEntity extends BlockEntity {
     }
 
     public void cycleModule(int module) {
-        modules[module].enabled = !modules[module].enabled;
+        burnSlots[module].enabled = !burnSlots[module].enabled;
         markDirty();
     }
 
@@ -188,7 +191,7 @@ public class AirConditioningBlockEntity extends BlockEntity {
         Predicate<ItemVariant> filter = entity.conditioning.getFilter();
         entity.updateHalt(inputStorage, filter);
 
-        int maxProgress = getMaxProgress(entity.modules);
+        int maxProgress = getMaxProgress(entity.burnSlots);
         if(entity.halt || entity.progress >= maxProgress) {
             entity.progress = 0;
         }else if(entity.progress + 3 > maxProgress) {
@@ -197,45 +200,56 @@ public class AirConditioningBlockEntity extends BlockEntity {
             entity.progress += 3;
         }
 
-        for (int i = 0 ; i < entity.modules.length; i++) {
-            Module module = entity.modules[i];
+        entity.level = 0;
+        for (int i = 0; i < entity.burnSlots.length; i++) {
+            BurnSlot burnSlot = entity.burnSlots[i];
             int amount = 28+13+(18*i);
-            if(module.enabled && entity.progress >= amount && entity.lastProgress < amount) {
-                Storage<ItemVariant> moduleStorage = InventoryStorage.of(new SlotSimpleInventory(entity.moduleInventory, i), null);
-
+            Storage<ItemVariant> moduleStorage = InventoryStorage.of(new SlotSimpleInventory(entity.moduleInventory, i), null);
+            if(burnSlot.enabled && entity.progress >= amount && entity.lastProgress < amount) {
                 try(Transaction transaction = Transaction.openOuter()) {
                     StorageUtil.move(inputStorage, moduleStorage, filter, 1, transaction);
-                    ItemVariant variant = StorageUtil.findExtractableResource(inputStorage, filter, transaction);
-                    if (variant == null || variant.isBlank()) {
-                        entity.halt = true;
-                    }
                     transaction.commit();
                 }
+                entity.updateHalt(inputStorage, filter);
+            }
+            if(burnSlot.burnTime <= 0 || --burnSlot.burnTime <= 0) {
+                try(Transaction transaction = Transaction.openOuter()) {
+                    ItemVariant variant = StorageUtil.findExtractableResource(moduleStorage, filter, transaction);
+                    if (variant != null && !variant.isBlank() && moduleStorage.extract(variant, 1, transaction) == 1) {
+                        burnSlot.burnTime = burnSlot.burnTimeTotal = entity.conditioning.getFuel(variant);
+                        transaction.commit();
+                    }else{
+                        transaction.abort();
+                    }
+                }
+            }
+            if(burnSlot.burnTime > 0) {
+                entity.level++;
             }
         }
 
         entity.lastProgress = entity.progress;
     }
 
-    public static int getMaxProgress(Module[] modules) {
+    public static int getMaxProgress(BurnSlot[] burnSlots) {
         int maxProgress = 28+13;
-        if(modules[2].enabled) {
+        if(burnSlots[2].enabled) {
             maxProgress = 64+13;
-        }else if(modules[1].enabled) {
+        }else if(burnSlots[1].enabled) {
             maxProgress = 46+13;
-        }else if(!modules[0].enabled) {
+        }else if(!burnSlots[0].enabled) {
             maxProgress = 0;
         }
         return maxProgress;
     }
 
-    public static class Module {
+    public static class BurnSlot {
 
         public boolean enabled;
         public int burnTime;
         public int burnTimeTotal;
 
-        public Module(boolean enabled, int burnTime, int burnTimeTotal) {
+        public BurnSlot(boolean enabled, int burnTime, int burnTimeTotal) {
             this.enabled = enabled;
             this.burnTime = burnTime;
             this.burnTimeTotal = burnTimeTotal;
@@ -281,8 +295,10 @@ public class AirConditioningBlockEntity extends BlockEntity {
             return texture;
         }
 
-        public Function<ItemStack, Integer> getFuel() {
-            return fuel;
+        @SuppressWarnings("UnstableApiUsage")
+        public int getFuel(ItemVariant variant) {
+            Integer fuelTime = fuel.apply(variant.toStack());
+            return fuelTime != null ? fuelTime : 0;
         }
 
         @SuppressWarnings("UnstableApiUsage")
