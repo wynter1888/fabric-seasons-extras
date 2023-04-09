@@ -1,7 +1,14 @@
 package io.github.lucaargolo.seasonsextras.blockentities;
 
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
+import io.github.lucaargolo.seasonsextras.utils.SlotSimpleInventory;
+import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SimpleInventory;
@@ -12,29 +19,38 @@ import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.function.Predicate;
+
 public class AirConditioningBlockEntity extends BlockEntity {
 
+    private int lastProgress = 0;
     private int progress = 0;
+    private boolean halt = false;
     private Conditioning conditioning;
 
     private final SimpleInventory inputInventory = new SimpleInventory(9) {
         @Override
         public void markDirty() {
             super.markDirty();
+            AirConditioningBlockEntity.this.halt = false;
             AirConditioningBlockEntity.this.markDirty();
         }
     };
+
     private final SimpleInventory moduleInventory = new SimpleInventory(3) {
         @Override
         public void markDirty() {
             super.markDirty();
+            AirConditioningBlockEntity.this.halt = false;
             AirConditioningBlockEntity.this.markDirty();
         }
     };
+
+
     private final Module[] modules = new Module[] {
-        new Module(true, moduleInventory.getStack(0), 0, 0),
-        new Module(false, moduleInventory.getStack(1), 0, 0),
-        new Module(false, moduleInventory.getStack(2), 0, 0)
+        new Module(true, 0, 0),
+        new Module(false, 0, 0),
+        new Module(false, 0, 0)
     };
 
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
@@ -102,7 +118,12 @@ public class AirConditioningBlockEntity extends BlockEntity {
         super.writeNbt(nbt);
         nbt.putInt("conditioning", conditioning.ordinal());
         nbt.putInt("progress", progress);
-        Inventories.writeNbt(nbt, inputInventory.stacks);
+        NbtCompound inputInventoryNbt = new NbtCompound();
+        Inventories.writeNbt(inputInventoryNbt, inputInventory.stacks);
+        nbt.put("inputInventory", inputInventoryNbt);
+        NbtCompound moduleInventoryNbt = new NbtCompound();
+        Inventories.writeNbt(moduleInventoryNbt, moduleInventory.stacks);
+        nbt.put("moduleInventory", moduleInventoryNbt);
         for (int i = 0 ; i < modules.length; i++) {
             nbt.put("module_" + i, modules[i].writeNbt(new NbtCompound()));
         }
@@ -113,7 +134,8 @@ public class AirConditioningBlockEntity extends BlockEntity {
         super.readNbt(nbt);
         conditioning = Conditioning.values()[Math.max(0, Math.min(Conditioning.values().length, nbt.getInt("conditioning")))];
         progress = nbt.getInt("progress");
-        Inventories.readNbt(nbt, inputInventory.stacks);
+        Inventories.readNbt(nbt.getCompound("inputInventory"), inputInventory.stacks);
+        Inventories.readNbt(nbt.getCompound("moduleInventory"), moduleInventory.stacks);
         for (int i = 0 ; i < modules.length; i++) {
             modules[i].readNbt(nbt.getCompound("module_" + i));
         }
@@ -136,7 +158,31 @@ public class AirConditioningBlockEntity extends BlockEntity {
         markDirty();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static void serverTick(World world, BlockPos pos, BlockState state, AirConditioningBlockEntity entity) {
+
+        if(entity.halt) {
+            entity.progress = 0;
+            entity.lastProgress = 0;
+            return;
+        }
+
+        Storage<ItemVariant> inputStorage = InventoryStorage.of(entity.inputInventory, null);
+
+        Predicate<ItemVariant> filter = itemVariant -> {
+            ItemStack stack = itemVariant.toStack();
+            //TODO: Fix this
+            return AbstractFurnaceBlockEntity.canUseAsFuel(stack);
+        };
+
+        ItemVariant variant;
+        try(Transaction transaction = Transaction.openOuter()) {
+            variant = StorageUtil.findExtractableResource(inputStorage, filter, transaction);
+            if (variant == null || variant.isBlank()) {
+                entity.halt = true;
+            }
+            transaction.commit();
+        }
 
         int maxProgress = getMaxProgress(entity.modules);
         if(entity.progress >= maxProgress) {
@@ -149,14 +195,22 @@ public class AirConditioningBlockEntity extends BlockEntity {
 
         for (int i = 0 ; i < entity.modules.length; i++) {
             Module module = entity.modules[i];
-            if(module.enabled && entity.progress == 28+13+(18*i)) {
-                if(module.stack.isEmpty()) {
-                    module.stack = Items.COAL.getDefaultStack();
-                }else{
-                    module.stack.increment(1);
+            int amount = 28+13+(18*i);
+            if(module.enabled && entity.progress >= amount && entity.lastProgress < amount) {
+                Storage<ItemVariant> moduleStorage = InventoryStorage.of(new SlotSimpleInventory(entity.moduleInventory, i), null);
+
+                try(Transaction transaction = Transaction.openOuter()) {
+                    StorageUtil.move(inputStorage, moduleStorage, filter, 1, transaction);
+                    variant = StorageUtil.findExtractableResource(inputStorage, filter, transaction);
+                    if (variant == null || variant.isBlank()) {
+                        entity.halt = true;
+                    }
+                    transaction.commit();
                 }
             }
         }
+
+        entity.lastProgress = entity.progress;
 
     }
 
@@ -175,27 +229,23 @@ public class AirConditioningBlockEntity extends BlockEntity {
     public static class Module {
 
         public boolean enabled;
-        public ItemStack stack;
         public int burnTime;
         public int burnTimeTotal;
 
-        public Module(boolean enabled, ItemStack stack, int burnTime, int burnTimeTotal) {
+        public Module(boolean enabled, int burnTime, int burnTimeTotal) {
             this.enabled = enabled;
-            this.stack = stack;
             this.burnTime = burnTime;
             this.burnTimeTotal = burnTimeTotal;
         }
 
         public void readNbt(NbtCompound nbt) {
             enabled = nbt.getBoolean("enabled");
-            stack = ItemStack.fromNbt(nbt.getCompound("stack"));
             burnTime = nbt.getInt("burnTime");
             burnTimeTotal = nbt.getInt("burnTimeTotal");
         }
 
         public NbtCompound writeNbt(NbtCompound nbt) {
             nbt.putBoolean("enabled", enabled);
-            nbt.put("stack", stack.writeNbt(new NbtCompound()));
             nbt.putInt("burnTime", burnTime);
             nbt.putInt("burnTimeTotal", burnTimeTotal);
             return nbt;
