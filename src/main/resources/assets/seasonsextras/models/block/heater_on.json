@@ -1,0 +1,9 @@
+{
+  "parent": "block/orientable",
+  "textures": {
+    "front": "seasonsextras:block/heater_front_on",
+    "side": "seasonsextras:block/heater_side",
+    "top": "seasonsextras:block/heater_top",
+    "bottom": "seasonsextras:block/heater_bottom"
+  }
+}

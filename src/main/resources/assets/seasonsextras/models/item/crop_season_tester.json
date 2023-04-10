@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "seasonsextras:item/crop_season_tester"
+  }
+}

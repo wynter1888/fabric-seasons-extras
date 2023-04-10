@@ -7,7 +7,7 @@
   ],
   "key": {
     "#": {
-      "tag": "minecraft:iron_bars"
+      "item": "minecraft:iron_bars"
     },
     "G": {
       "item": "minecraft:tinted_glass"

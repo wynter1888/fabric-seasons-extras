@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "level=0,facing=west": { "model": "seasonsextras:block/chiller", "y": 270 },
+    "level=0,facing=south": { "model": "seasonsextras:block/chiller", "y": 180 },
+    "level=0,facing=north": { "model": "seasonsextras:block/chiller", "y": 0 },
+    "level=0,facing=east": { "model": "seasonsextras:block/chiller", "y": 90 },
+    "level=1,facing=west": { "model": "seasonsextras:block/chiller_on", "y": 270 },
+    "level=1,facing=south": { "model": "seasonsextras:block/chiller_on", "y": 180 },
+    "level=1,facing=north": { "model": "seasonsextras:block/chiller_on", "y": 0 },
+    "level=1,facing=east": { "model": "seasonsextras:block/chiller_on", "y": 90 },
+    "level=2,facing=west": { "model": "seasonsextras:block/chiller_on", "y": 270 },
+    "level=2,facing=south": { "model": "seasonsextras:block/chiller_on", "y": 180 },
+    "level=2,facing=north": { "model": "seasonsextras:block/chiller_on", "y": 0 },
+    "level=2,facing=east": { "model": "seasonsextras:block/chiller_on", "y": 90 },
+    "level=3,facing=west": { "model": "seasonsextras:block/chiller_on", "y": 270 },
+    "level=3,facing=south": { "model": "seasonsextras:block/chiller_on", "y": 180 },
+    "level=3,facing=north": { "model": "seasonsextras:block/chiller_on", "y": 0 },
+    "level=3,facing=east": { "model": "seasonsextras:block/chiller_on", "y": 90 }
+  }
+}

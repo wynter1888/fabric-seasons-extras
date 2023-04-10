@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#_#",
+    "CFC",
+    "#S#"
+  ],
+  "key": {
+    "#": {
+      "tag": "minecraft:logs"
+    },
+    "_": {
+      "tag": "minecraft:planks"
+    },
+    "C": {
+      "tag": "minecraft:stone_tool_materials"
+    },
+    "F": {
+      "item": "minecraft:furnace"
+    },
+    "S": {
+      "item": "minecraft:campfire"
+    }
+  },
+  "result": {
+    "item": "seasonsextras:heater",
+    "count": 1
+  }
+}

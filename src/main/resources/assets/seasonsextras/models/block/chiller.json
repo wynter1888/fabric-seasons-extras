@@ -1,0 +1,9 @@
+{
+  "parent": "block/orientable",
+  "textures": {
+    "front": "seasonsextras:block/chiller_front",
+    "side": "seasonsextras:block/chiller_side",
+    "top": "seasonsextras:block/chiller_top",
+    "bottom": "seasonsextras:block/chiller_bottom"
+  }
+}

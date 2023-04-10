@@ -1,6 +1,10 @@
 package io.github.lucaargolo.seasonsextras.blockentities;
 
+import io.github.lucaargolo.seasons.FabricSeasons;
+import io.github.lucaargolo.seasons.utils.GreenhouseCache;
+import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
+import io.github.lucaargolo.seasonsextras.block.AirConditioningBlock;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import io.github.lucaargolo.seasonsextras.utils.SlotSimpleInventory;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
@@ -12,19 +16,29 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.SidedInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class AirConditioningBlockEntity extends BlockEntity {
+
+    private GreenhouseCache.GreenHouseTicket ticket = null;
 
     private int lastProgress = 0;
     private int progress = 0;
@@ -33,24 +47,8 @@ public class AirConditioningBlockEntity extends BlockEntity {
     private boolean halt = false;
     private Conditioning conditioning;
 
-    private final SimpleInventory inputInventory = new SimpleInventory(9) {
-        @Override
-        public void markDirty() {
-            super.markDirty();
-            AirConditioningBlockEntity.this.halt = false;
-            AirConditioningBlockEntity.this.markDirty();
-        }
-    };
-
-    private final SimpleInventory moduleInventory = new SimpleInventory(3) {
-        @Override
-        public void markDirty() {
-            super.markDirty();
-            AirConditioningBlockEntity.this.halt = false;
-            AirConditioningBlockEntity.this.markDirty();
-        }
-    };
-
+    private final SimpleInventory inputInventory = new FilteredSimpleInventory(9);
+    private final SimpleInventory moduleInventory = new FilteredSimpleInventory(3);
 
     private final BurnSlot[] burnSlots = new BurnSlot[] {
         new BurnSlot(true, 0, 0),
@@ -179,13 +177,6 @@ public class AirConditioningBlockEntity extends BlockEntity {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private void updateHalt() {
-        Storage<ItemVariant> inputStorage = InventoryStorage.of(inputInventory, null);
-        Predicate<ItemVariant> filter = conditioning.getFilter();
-        updateHalt(inputStorage, filter);
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
     public static void serverTick(World world, BlockPos pos, BlockState state, AirConditioningBlockEntity entity) {
         Storage<ItemVariant> inputStorage = InventoryStorage.of(entity.inputInventory, null);
         Predicate<ItemVariant> filter = entity.conditioning.getFilter();
@@ -226,6 +217,28 @@ public class AirConditioningBlockEntity extends BlockEntity {
             if(burnSlot.burnTime > 0) {
                 entity.level++;
             }
+        }
+
+        if(entity.level > 0) {
+            Season worldSeason = FabricSeasons.getCurrentSeason(world);
+            Season conditionedSeason = entity.conditioning.getConditioned(worldSeason, entity.level);
+            if (entity.ticket == null || entity.ticket.expired || !entity.ticket.seasons.contains(conditionedSeason)) {
+                BlockBox box = BlockBox.create(pos.add(-4, -4, -4), pos.add(4, 4, 4));
+                entity.ticket = new GreenhouseCache.GreenHouseTicket(box, conditionedSeason);
+                ChunkPos corner1 = new ChunkPos(pos.add(-4, -4, -4));
+                ChunkPos corner2 = new ChunkPos(pos.add(4, 4, 4));
+                for(int x = Math.min(corner1.x, corner2.x); x < (Math.max(corner1.x, corner2.x) - Math.min(corner1.x, corner2.x))+1+Math.min(corner1.x, corner2.x); x++) {
+                    for(int z = Math.min(corner1.z, corner2.z); z < (Math.max(corner1.z, corner2.z) - Math.min(corner1.z, corner2.z))+1+Math.min(corner1.z, corner2.z); z++) {
+                        GreenhouseCache.add(world, new ChunkPos(x, z), entity.ticket);
+                    }
+                }
+            } else {
+                //If the greenhouse glass is removed / its season get changed, the ticket will stop updating and will be removed when tested.
+                entity.ticket.age++;
+            }
+        }
+        if(state.get(AirConditioningBlock.LEVEL) != entity.level) {
+            world.setBlockState(pos, state.with(AirConditioningBlock.LEVEL, entity.level));
         }
 
         entity.lastProgress = entity.progress;
@@ -270,25 +283,79 @@ public class AirConditioningBlockEntity extends BlockEntity {
 
     }
 
+    @SuppressWarnings("UnstableApiUsage")
+    private class FilteredSimpleInventory extends SimpleInventory implements SidedInventory {
+
+        private final int[] slots;
+
+        public FilteredSimpleInventory(int size) {
+            super(size);
+            slots = new int[size];
+            for(int s = 0; s < size; s++) {
+                slots[s] = s;
+            }
+        }
+
+        @Override
+        public void markDirty() {
+            super.markDirty();
+            AirConditioningBlockEntity.this.halt = false;
+            AirConditioningBlockEntity.this.markDirty();
+        }
+
+        @Override
+        public int[] getAvailableSlots(Direction side) {
+            return slots;
+        }
+
+        @Override
+        public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
+            return AirConditioningBlockEntity.this.conditioning.getFilter().test(ItemVariant.of(stack));
+        }
+
+        @Override
+        public boolean canExtract(int slot, ItemStack stack, Direction dir) {
+            return false;
+        }
+    }
+
     public enum Conditioning {
-        HEATER(new ModIdentifier("textures/gui/heater.png"), stack -> FuelRegistry.INSTANCE.get(stack.getItem())),
+
+        HEATER(new ModIdentifier("textures/gui/heater.png"), stack -> FuelRegistry.INSTANCE.get(stack.getItem()), (current, level) -> {
+            if(level == 2 && current == Season.WINTER) return Season.SPRING;
+            else if(level == 1 && current == Season.FALL) return Season.SPRING;
+            else if(level == 1 && current == Season.WINTER) return Season.FALL;
+            else return Season.SUMMER;
+        }),
         CHILLER(new ModIdentifier("textures/gui/chiller.png"), stack -> {
             if(stack.isOf(Items.POWDER_SNOW_BUCKET)) return 20;
-            if(stack.isOf(Items.SNOW_BLOCK)) return 20;
+            else if(stack.isOf(Items.SNOW_BLOCK)) return 20;
             if(stack.isOf(Items.PACKED_ICE)) return 360;
             if(stack.isOf(Items.BLUE_ICE)) return 3240;
             if(stack.isOf(Items.SNOWBALL)) return 5;
             if(stack.isOf(Items.SNOW)) return 10;
             if(stack.isOf(Items.ICE)) return 40;
             return 0;
+        }, (current, level) -> {
+            if(level == 2 && current == Season.SUMMER) return Season.FALL;
+            else if(level == 1 && current == Season.SPRING) return Season.FALL;
+            else if(level == 1 && current == Season.SUMMER) return Season.SPRING;
+            else return Season.WINTER;
         });
 
         private final Identifier texture;
         private final Function<ItemStack, Integer> fuel;
 
-        Conditioning(Identifier texture, Function<ItemStack, Integer> fuel) {
+        private final BiFunction<Season, Integer, Season> conditioning;
+
+        Conditioning(Identifier texture, Function<ItemStack, Integer> fuel, BiFunction<Season, Integer, Season> conditioning) {
             this.texture = texture;
             this.fuel = fuel;
+            this.conditioning = conditioning;
+        }
+
+        public Season getConditioned(Season current, int level) {
+            return conditioning.apply(current, level);
         }
 
         public Identifier getTexture() {
