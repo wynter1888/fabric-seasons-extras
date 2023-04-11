@@ -23,6 +23,7 @@ import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -45,8 +46,8 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
     public static HashMap<Identifier, JsonObject> multiblocks = new HashMap<>();
 
     public static boolean prefersCelsius = true;
+    public static final List<Text> testedTooltip = new ArrayList<>();
     public static BlockPos testedPos = null;
-    public static Season testedSeason = null;
 
 
     @Override
@@ -68,13 +69,15 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
         });
         ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_TESTED_SEASON_S2C, (client, handler, buf, responseSender) -> {
             BlockPos receivedTestedPos = buf.readBlockPos();
-            boolean isSeasonIgnored = buf.readBoolean();
-            Season receivedTestedSeason = buf.readEnumConstant(Season.class);
+            List<Text> receivedTooltip = new ArrayList<>();
+            int size = buf.readInt();
+            for(int i = 0; i < size; i++) {
+                receivedTooltip.add(buf.readText());
+            }
             client.execute(() -> {
                 testedPos = receivedTestedPos;
-                if(!isSeasonIgnored) {
-                    testedSeason = receivedTestedSeason;
-                }
+                testedTooltip.clear();
+                testedTooltip.addAll(receivedTooltip);
             });
         });
         ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_VALID_BIOMES_S2C, (client, handler, buf, responseSender) -> {

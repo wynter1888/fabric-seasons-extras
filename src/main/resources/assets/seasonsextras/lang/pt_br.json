@@ -21,8 +21,8 @@
   "block.seasonsextras.white_greenhouse_glass": "Vidro de estufa branco",
   "block.seasonsextras.yellow_greenhouse_glass": "Vidro de estufa amarelo",
   "block.seasonsextras.tinted_greenhouse_glass": "Vidro de estufa fosco",
-  "block.seasonsextras.heater": "Aquecedor",
-  "block.seasonsextras.chiller": "Resfriador",
+  "block.seasonsextras.heater": "Aquecedor de plantação",
+  "block.seasonsextras.chiller": "Resfriador de plantação",
 
   "tooltip.seasonsextras.calendar_info_1": "Atualmente estamos no ",
   "tooltip.seasonsextras.calendar_info_2": " faltando para o ",

@@ -28,6 +28,7 @@ import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityT
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.FilteringStorage;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
@@ -126,14 +127,15 @@ public class FabricSeasonsExtras implements ModInitializer {
         });
 
         ServerPlayNetworking.registerGlobalReceiver(SEND_MODULE_PRESS_C2S, (server, player, handler, buf, sender) -> {
-            int module = buf.readInt();
+            int button = buf.readInt();
             server.execute(() -> {
                 if(player.currentScreenHandler instanceof AirConditioningScreenHandler screenHandler) {
-                    screenHandler.cycleModule(module);
+                    screenHandler.cycleButton(button);
                 }
             });
         });
         ItemStorage.SIDED.registerForBlockEntity((entity, direction) -> InventoryStorage.of(entity.getInputInventory(), direction), AIR_CONDITIONING_TYPE);
+        ItemStorage.SIDED.registerForBlockEntity((entity, direction) -> FilteringStorage.extractOnlyOf(InventoryStorage.of(entity.getModuleInventory(), direction)), AIR_CONDITIONING_TYPE);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

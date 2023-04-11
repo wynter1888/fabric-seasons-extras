@@ -23,13 +23,12 @@ public class GreenHouseGlassItem extends BlockItem {
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(stack, world, tooltip, context);
-        //TODO: Translate these
         if(greenhouseGlassBlock.inverted) {
-            tooltip.add(Text.literal("Slightly colds up crops planted under itself").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
-            tooltip.add(Text.literal("allowing some of them to grow out of season.").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
+            tooltip.add(Text.translatable("tooltip.seasonsextras.cold_glass_1").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
+            tooltip.add(Text.translatable("tooltip.seasonsextras.cold_glass_2").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
         }else{
-            tooltip.add(Text.literal("Slightly warms up crops planted under itself").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
-            tooltip.add(Text.literal("allowing some of them to grow out of season.").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
+            tooltip.add(Text.translatable("tooltip.seasonsextras.warm_glass_1").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
+            tooltip.add(Text.translatable("tooltip.seasonsextras.warm_glass_2").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
         }
 
     }

@@ -5,6 +5,7 @@ import io.github.lucaargolo.seasons.utils.GreenhouseCache;
 import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
 import io.github.lucaargolo.seasonsextras.block.AirConditioningBlock;
+import io.github.lucaargolo.seasonsextras.screenhandlers.AirConditioningScreenHandler;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import io.github.lucaargolo.seasonsextras.utils.SlotSimpleInventory;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
@@ -14,46 +15,56 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.InventoryProvider;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.Packet;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.screen.PropertyDelegate;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockBox;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.*;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class AirConditioningBlockEntity extends BlockEntity {
+public class AirConditioningBlockEntity extends BlockEntity implements Inventory, SidedInventory {
 
     private GreenhouseCache.GreenHouseTicket ticket = null;
 
-    private int lastProgress = 0;
+
+    private Conditioning conditioning;
+    private boolean particles = true;
     private int progress = 0;
 
+    private int lastProgress = 0;
     private int level = 0;
     private boolean halt = false;
-    private Conditioning conditioning;
 
-    private final SimpleInventory inputInventory = new FilteredSimpleInventory(9);
-    private final SimpleInventory moduleInventory = new FilteredSimpleInventory(3);
+    private final FilteredSimpleInventory inputInventory = new FilteredSimpleInventory(9);
+    private final FilteredSimpleInventory moduleInventory = new FilteredSimpleInventory(3);
 
     private final BurnSlot[] burnSlots = new BurnSlot[] {
-        new BurnSlot(true, 0, 0),
-        new BurnSlot(false, 0, 0),
-        new BurnSlot(false, 0, 0)
+        new BurnSlot(true, false, 0, 0),
+        new BurnSlot(false, false, 0, 0),
+        new BurnSlot(false, false, 0, 0)
     };
 
     private final PropertyDelegate propertyDelegate = new PropertyDelegate() {
@@ -68,7 +79,7 @@ public class AirConditioningBlockEntity extends BlockEntity {
                     return AirConditioningBlockEntity.this.conditioning.ordinal();
                 }
                 case 2 -> {
-                    return AirConditioningBlockEntity.this.level;
+                    return AirConditioningBlockEntity.this.particles ? 1 : 0;
                 }
                 case 3 -> {
                     return AirConditioningBlockEntity.this.burnSlots[0].enabled ? 1 : 0;
@@ -102,7 +113,7 @@ public class AirConditioningBlockEntity extends BlockEntity {
         }
 
         @Override
-        public void set(int index, int value) { }
+        public void set(int index, int value) {}
 
         @Override
         public int size() {
@@ -122,7 +133,6 @@ public class AirConditioningBlockEntity extends BlockEntity {
     @Override
     protected void writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
-        nbt.putInt("conditioning", conditioning.ordinal());
         nbt.putInt("progress", progress);
         NbtCompound inputInventoryNbt = new NbtCompound();
         Inventories.writeNbt(inputInventoryNbt, inputInventory.stacks);
@@ -133,18 +143,42 @@ public class AirConditioningBlockEntity extends BlockEntity {
         for (int i = 0; i < burnSlots.length; i++) {
             nbt.put("module_" + i, burnSlots[i].writeNbt(new NbtCompound()));
         }
+        writeClientNbt(nbt);
+    }
+
+    public void writeClientNbt(NbtCompound nbt) {
+        nbt.putInt("conditioning", conditioning.ordinal());
+        nbt.putBoolean("particles", particles);
     }
 
     @Override
     public void readNbt(NbtCompound nbt) {
         super.readNbt(nbt);
-        conditioning = Conditioning.values()[Math.max(0, Math.min(Conditioning.values().length, nbt.getInt("conditioning")))];
         progress = nbt.getInt("progress");
         Inventories.readNbt(nbt.getCompound("inputInventory"), inputInventory.stacks);
         Inventories.readNbt(nbt.getCompound("moduleInventory"), moduleInventory.stacks);
         for (int i = 0; i < burnSlots.length; i++) {
             burnSlots[i].readNbt(nbt.getCompound("module_" + i));
         }
+        readClientNbt(nbt);
+    }
+
+    public void readClientNbt(NbtCompound nbt) {
+        conditioning = Conditioning.values()[Math.max(0, Math.min(Conditioning.values().length, nbt.getInt("conditioning")))];
+        particles = nbt.getBoolean("particles");
+    }
+
+    @Nullable
+    @Override
+    public Packet<ClientPlayPacketListener> toUpdatePacket() {
+        return BlockEntityUpdateS2CPacket.create(this);
+    }
+
+    @Override
+    public NbtCompound toInitialChunkDataNbt() {
+        NbtCompound nbt = new NbtCompound();
+        this.writeClientNbt(nbt);
+        return nbt;
     }
 
     public PropertyDelegate getPropertyDelegate() {
@@ -159,9 +193,19 @@ public class AirConditioningBlockEntity extends BlockEntity {
         return this.moduleInventory;
     }
 
-    public void cycleModule(int module) {
-        burnSlots[module].enabled = !burnSlots[module].enabled;
+    public void cycleButton(int index) {
         markDirty();
+        switch (index) {
+            case 0 -> this.burnSlots[0].enabled = !this.burnSlots[0].enabled;
+            case 1 -> this.burnSlots[1].enabled = !this.burnSlots[1].enabled;
+            case 2 -> this.burnSlots[2].enabled = !this.burnSlots[2].enabled;
+            case 3 -> {
+                this.particles = !this.particles;
+                if(world instanceof ServerWorld serverWorld) {
+                    serverWorld.getChunkManager().markForUpdate(this.pos);
+                }
+            }
+        }
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -182,7 +226,8 @@ public class AirConditioningBlockEntity extends BlockEntity {
         Predicate<ItemVariant> filter = entity.conditioning.getFilter();
         entity.updateHalt(inputStorage, filter);
 
-        int maxProgress = getMaxProgress(entity.burnSlots);
+        BurnSlot[] burnSlots = AirConditioningScreenHandler.getBurnSlots(entity.moduleInventory, entity.propertyDelegate);
+        int maxProgress = AirConditioningScreenHandler.getMaxProgress(burnSlots);
         if(entity.halt || entity.progress >= maxProgress) {
             entity.progress = 0;
         }else if(entity.progress + 3 > maxProgress) {
@@ -190,10 +235,11 @@ public class AirConditioningBlockEntity extends BlockEntity {
         }else{
             entity.progress += 3;
         }
+        burnSlots = entity.burnSlots;
 
         entity.level = 0;
-        for (int i = 0; i < entity.burnSlots.length; i++) {
-            BurnSlot burnSlot = entity.burnSlots[i];
+        for (int i = 0; i < burnSlots.length; i++) {
+            BurnSlot burnSlot = burnSlots[i];
             int amount = 28+13+(18*i);
             Storage<ItemVariant> moduleStorage = InventoryStorage.of(new SlotSimpleInventory(entity.moduleInventory, i), null);
             if(burnSlot.enabled && entity.progress >= amount && entity.lastProgress < amount) {
@@ -208,6 +254,13 @@ public class AirConditioningBlockEntity extends BlockEntity {
                     ItemVariant variant = StorageUtil.findExtractableResource(moduleStorage, filter, transaction);
                     if (variant != null && !variant.isBlank() && moduleStorage.extract(variant, 1, transaction) == 1) {
                         burnSlot.burnTime = burnSlot.burnTimeTotal = entity.conditioning.getFuel(variant);
+                        ItemVariant result = StorageUtil.findExtractableResource(moduleStorage, filter, transaction);
+                        if ((result == null || result.isBlank()) && variant.getItem().hasRecipeRemainder()) {
+                            Item item = variant.getItem().getRecipeRemainder();
+                            ItemStack stack = item == null ? ItemStack.EMPTY : new ItemStack(item);
+                            ItemVariant remainder = ItemVariant.of(stack);
+                            moduleStorage.insert(remainder, 1, transaction);
+                        }
                         transaction.commit();
                     }else{
                         transaction.abort();
@@ -244,26 +297,92 @@ public class AirConditioningBlockEntity extends BlockEntity {
         entity.lastProgress = entity.progress;
     }
 
-    public static int getMaxProgress(BurnSlot[] burnSlots) {
-        int maxProgress = 28+13;
-        if(burnSlots[2].enabled) {
-            maxProgress = 64+13;
-        }else if(burnSlots[1].enabled) {
-            maxProgress = 46+13;
-        }else if(!burnSlots[0].enabled) {
-            maxProgress = 0;
+    public static void clientTick(World world, BlockPos pos, BlockState state, AirConditioningBlockEntity entity) {
+        if(entity.particles) {
+            Random random = world.getRandom();
+            int level = state.get(AirConditioningBlock.LEVEL);
+            if (level > 0) {
+                for (int a = 0; a < random.nextInt(MathHelper.ceil(Math.pow(3.0, level))); a++) {
+                    world.addParticle(entity.conditioning.getParticle(), pos.getX() + (random.nextInt(900) - 400) / 100.0, pos.getY() + (random.nextInt(900) - 400) / 100.0, pos.getZ() + (random.nextInt(900) - 400) / 100.0, 0.0, 0.0, 0.0);
+                }
+            }
         }
-        return maxProgress;
     }
+
+    @Override
+    public int size() {
+        return inputInventory.size() + moduleInventory.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return inputInventory.isEmpty() && moduleInventory.isEmpty();
+    }
+
+    @Override
+    public ItemStack getStack(int slot) {
+        return slot < inputInventory.size() ? inputInventory.getStack(slot) : moduleInventory.getStack(slot - inputInventory.size());
+    }
+
+    @Override
+    public ItemStack removeStack(int slot, int amount) {
+        return slot < inputInventory.size() ? inputInventory.removeStack(slot, amount) : moduleInventory.removeStack(slot - inputInventory.size(), amount);
+    }
+
+    @Override
+    public ItemStack removeStack(int slot) {
+        return slot < inputInventory.size() ? inputInventory.removeStack(slot) : moduleInventory.removeStack(slot - inputInventory.size());
+    }
+
+    @Override
+    public void setStack(int slot, ItemStack stack) {
+        if(slot < inputInventory.size()) {
+            inputInventory.setStack(slot, stack);
+        } else {
+            moduleInventory.setStack(slot - inputInventory.size(), stack);
+        }
+    }
+
+    @Override
+    public boolean canPlayerUse(PlayerEntity player) {
+        return inputInventory.canPlayerUse(player) && moduleInventory.canPlayerUse(player);
+    }
+
+    @Override
+    public void clear() {
+        inputInventory.clear();
+        moduleInventory.clear();
+    }
+
+    @Override
+    public int[] getAvailableSlots(Direction side) {
+        if(side == Direction.DOWN) {
+            return Arrays.stream(moduleInventory.getAvailableSlots(side)).map(i -> i+inputInventory.size()).toArray();
+        }
+        return inputInventory.getAvailableSlots(side);
+    }
+
+    @Override
+    public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
+        return slot < inputInventory.size() ? inputInventory.canInsert(slot, stack, dir) : moduleInventory.canInsert(slot, stack, dir);
+    }
+
+    @Override
+    public boolean canExtract(int slot, ItemStack stack, Direction dir) {
+        return slot < inputInventory.size() ? inputInventory.canExtract(slot, stack, dir) : moduleInventory.canExtract(slot, stack, dir);
+    }
+
 
     public static class BurnSlot {
 
         public boolean enabled;
+        public boolean full;
         public int burnTime;
         public int burnTimeTotal;
 
-        public BurnSlot(boolean enabled, int burnTime, int burnTimeTotal) {
+        public BurnSlot(boolean enabled, boolean full, int burnTime, int burnTimeTotal) {
             this.enabled = enabled;
+            this.full = full;
             this.burnTime = burnTime;
             this.burnTimeTotal = burnTimeTotal;
         }
@@ -315,43 +434,53 @@ public class AirConditioningBlockEntity extends BlockEntity {
 
         @Override
         public boolean canExtract(int slot, ItemStack stack, Direction dir) {
-            return false;
+            return !canInsert(slot, stack, dir);
         }
     }
 
     public enum Conditioning {
 
-        HEATER(new ModIdentifier("textures/gui/heater.png"), stack -> FuelRegistry.INSTANCE.get(stack.getItem()), (current, level) -> {
+        HEATER(new ModIdentifier("textures/gui/heater.png"), stack -> {
+            Integer fuel = FuelRegistry.INSTANCE.get(stack.getItem());
+            if(fuel != null) {
+                return fuel*3;
+            }else{
+                return 0;
+            }
+        }, (current, level) -> {
             if(level == 2 && current == Season.WINTER) return Season.SPRING;
             else if(level == 1 && current == Season.FALL) return Season.SPRING;
             else if(level == 1 && current == Season.WINTER) return Season.FALL;
             else return Season.SUMMER;
-        }),
+        }, ParticleTypes.FLAME),
         CHILLER(new ModIdentifier("textures/gui/chiller.png"), stack -> {
-            if(stack.isOf(Items.POWDER_SNOW_BUCKET)) return 20;
-            else if(stack.isOf(Items.SNOW_BLOCK)) return 20;
-            if(stack.isOf(Items.PACKED_ICE)) return 360;
-            if(stack.isOf(Items.BLUE_ICE)) return 3240;
-            if(stack.isOf(Items.SNOWBALL)) return 5;
-            if(stack.isOf(Items.SNOW)) return 10;
-            if(stack.isOf(Items.ICE)) return 40;
+            if(stack.isOf(Items.POWDER_SNOW_BUCKET)) return 20*30;
+            else if(stack.isOf(Items.SNOW_BLOCK)) return 20*30;
+            if(stack.isOf(Items.PACKED_ICE)) return 360*30;
+            if(stack.isOf(Items.BLUE_ICE)) return 3240*30;
+            if(stack.isOf(Items.SNOWBALL)) return 5*30;
+            if(stack.isOf(Items.SNOW)) return 10*30;
+            if(stack.isOf(Items.ICE)) return 40*30;
             return 0;
         }, (current, level) -> {
             if(level == 2 && current == Season.SUMMER) return Season.FALL;
             else if(level == 1 && current == Season.SPRING) return Season.FALL;
             else if(level == 1 && current == Season.SUMMER) return Season.SPRING;
             else return Season.WINTER;
-        });
+        }, ParticleTypes.SNOWFLAKE);
 
         private final Identifier texture;
         private final Function<ItemStack, Integer> fuel;
 
         private final BiFunction<Season, Integer, Season> conditioning;
 
-        Conditioning(Identifier texture, Function<ItemStack, Integer> fuel, BiFunction<Season, Integer, Season> conditioning) {
+        private final ParticleEffect particle;
+
+        Conditioning(Identifier texture, Function<ItemStack, Integer> fuel, BiFunction<Season, Integer, Season> conditioning, ParticleEffect particle) {
             this.texture = texture;
             this.fuel = fuel;
             this.conditioning = conditioning;
+            this.particle = particle;
         }
 
         public Season getConditioned(Season current, int level) {
@@ -374,6 +503,10 @@ public class AirConditioningBlockEntity extends BlockEntity {
                 Integer fuelTime = fuel.apply(variant.toStack());
                 return fuelTime != null && fuelTime > 0;
             };
+        }
+
+        public ParticleEffect getParticle() {
+            return particle;
         }
     }
 
