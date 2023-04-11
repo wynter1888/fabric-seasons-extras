@@ -94,8 +94,8 @@ public class AirConditioningScreen extends HandledScreen<AirConditioningScreenHa
             this.fillGradient(matrices, 163, 6, 163+7, 6+7, -2130706433, -2130706433);
             tooltip.add(Text.translatable("screen.seasonsextras."+(handler.hasParticles() ? "disable" : "enable")+"_particles").formatted(handler.hasParticles() ? Formatting.GRAY : Formatting.YELLOW).asOrderedText());
         }
-        if(mouseX >= x+97 && mouseX < x+97+58 && mouseY >= y+16 && mouseY < y+16+18) {
-            this.fillGradient(matrices, 97, 16, 97+58, 16+18, -2130706433, -2130706433);
+        if(mouseX >= x+97 && mouseX < x+97+54 && mouseY >= y+16 && mouseY < y+16+18) {
+            this.fillGradient(matrices, 97, 16, 97+54, 16+18, -2130706433, -2130706433);
             int level = handler.getLevel();
             Season worldSeason = FabricSeasons.getCurrentSeason();
             Season conditionedSeason = handler.getConditioning().getConditioned(worldSeason, level);
