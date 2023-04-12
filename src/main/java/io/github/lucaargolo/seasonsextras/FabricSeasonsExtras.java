@@ -23,6 +23,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
@@ -61,7 +62,7 @@ public class FabricSeasonsExtras implements ModInitializer {
     public static final String MOD_ID = "seasonsextras";
 
     //TODO: Add patchouli entries for blocks/items
-    //TODO: Add missing advancements for recipes
+    //TODO: Make patchouli optional
 
     //Block Entities
     public static BlockEntityType<SeasonDetectorBlockEntity> SEASON_DETECTOR_TYPE = null;
@@ -142,6 +143,8 @@ public class FabricSeasonsExtras implements ModInitializer {
 
         ItemStorage.SIDED.registerForBlockEntity((entity, direction) -> InventoryStorage.of(entity.getInputInventory(), direction), AIR_CONDITIONING_TYPE);
         ItemStorage.SIDED.registerForBlockEntity((entity, direction) -> FilteringStorage.extractOnlyOf(InventoryStorage.of(entity.getModuleInventory(), direction)), AIR_CONDITIONING_TYPE);
+
+        ResourceConditions.register(new ModIdentifier("is_season_messing_crops"), json -> FabricSeasons.CONFIG.isSeasonMessingCrops());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

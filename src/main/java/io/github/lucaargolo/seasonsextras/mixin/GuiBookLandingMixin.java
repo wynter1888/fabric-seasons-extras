@@ -3,6 +3,7 @@ package io.github.lucaargolo.seasonsextras.mixin;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import io.github.lucaargolo.seasons.FabricSeasons;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -84,12 +85,22 @@ public class GuiBookLandingMixin extends GuiBook {
             entriesInPamphlet.add(dummyEntry);
             entriesInPamphlet.add(dummyEntry);
             entriesInPamphlet.add(capturedEntriesInPamphlet.get(0));
-            entriesInPamphlet.add(capturedEntriesInPamphlet.get(1));
+            if(FabricSeasons.CONFIG.isSeasonMessingCrops()) {
+                entriesInPamphlet.add(capturedEntriesInPamphlet.get(1));
+            }
             entriesInPamphlet.add(dummyEntry);
             entriesInPamphlet.add(dummyEntry);
             entriesInPamphlet.add(dummyEntry);
-            for (int i = 2; i < capturedEntriesInPamphlet.size(); i++) {
-                entriesInPamphlet.add(capturedEntriesInPamphlet.get(i));
+            if(FabricSeasons.CONFIG.isSeasonMessingCrops()) {
+                entriesInPamphlet.add(capturedEntriesInPamphlet.get(2));
+                entriesInPamphlet.add(capturedEntriesInPamphlet.get(3));
+                entriesInPamphlet.add(capturedEntriesInPamphlet.get(4));
+                entriesInPamphlet.add(capturedEntriesInPamphlet.get(5));
+            }
+            entriesInPamphlet.add(capturedEntriesInPamphlet.get(6));
+            entriesInPamphlet.add(capturedEntriesInPamphlet.get(7));
+            if(FabricSeasons.CONFIG.isSeasonMessingCrops()) {
+                entriesInPamphlet.add(capturedEntriesInPamphlet.get(8));
             }
         }
     }
@@ -139,7 +150,7 @@ public class GuiBookLandingMixin extends GuiBook {
     @Inject(at = @At(value = "INVOKE", target = "Lvazkii/patchouli/client/book/gui/GuiBookLanding;addEntryButtons(IIII)V"), method = "buildEntryButtons")
     public void addPageButton(CallbackInfo ci) {
         if(capturedBook.id.equals(new ModIdentifier("seasonal_compendium"))) {
-            maxSpreads += (int) Math.ceil((float) entriesInPamphlet.size() / (13 * 2));
+            maxSpreads = (int) Math.ceil((float) (13+entriesInPamphlet.size()) / (13 * 2));
         }
     }
 
@@ -159,11 +170,12 @@ public class GuiBookLandingMixin extends GuiBook {
             if (spread == 0) {
                 int color = book.nameplateColor;
                 drawFromTexture(ms, book, 272 - 132, 12, 0, 211, 140, 31);
-                textRenderer.draw(ms, Text.literal("Modifications"), 272 - 132 + 21, 16, color);
-                textRenderer.draw(ms, Text.literal("Info about seasonal changes.").fillStyle(book.getFontStyle()), 272 - 132 + 21, 24, color);
-                drawFromTexture(ms, book, 272 - 132, 69, 0, 211, 140, 31);
-                textRenderer.draw(ms, Text.literal("Resources"), 272 - 132 + 21, 73, color);
-                textRenderer.draw(ms, Text.literal("Blocks and items to help you.").fillStyle(book.getFontStyle()), 272 - 132 + 21, 81, color);
+                textRenderer.draw(ms, Text.translatable("patchouli.seasonsextras.modifications"), 272 - 132 + 21, 16, color);
+                textRenderer.draw(ms, Text.translatable("patchouli.seasonsextras.modifications_info").fillStyle(book.getFontStyle()), 272 - 132 + 21, 24, color);
+                int cropOffset = FabricSeasons.CONFIG.isSeasonMessingCrops() ? 0 : -10;
+                drawFromTexture(ms, book, 272 - 132, 69+cropOffset, 0, 211, 140, 31);
+                textRenderer.draw(ms, Text.translatable("patchouli.seasonsextras.resources"), 272 - 132 + 21, 73+cropOffset, color);
+                textRenderer.draw(ms, Text.translatable("patchouli.seasonsextras.resources_info").fillStyle(book.getFontStyle()), 272 - 132 + 21, 81+cropOffset, color);
             } else {
                 ci.cancel();
             }

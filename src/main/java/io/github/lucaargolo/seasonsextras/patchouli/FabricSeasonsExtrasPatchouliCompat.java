@@ -112,28 +112,36 @@ public class FabricSeasonsExtrasPatchouliCompat {
         String winterTemperature = "$(seasonsextrastemperature:"+winterPair.getRight()+")";
 
         StringBuilder rainInfo = new StringBuilder(rainSeasons.isEmpty() ? "$(seasonsextrastranslate:patchouli.seasonsextras.doesnotrain)" : "$(seasonsextrastranslate:patchouli.seasonsextras.rainsduring)"+" ");
-        for(int i = 0; i < rainSeasons.size(); i++) {
-            Season season = rainSeasons.get(i);
-            rainInfo.append("$(").append(season.getDarkFormatting().getCode()).append(")$(seasonsextrastranslate:").append(season.getTranslationKey()).append(")");
-            if(i == rainSeasons.size()-1) {
-                rainInfo.append("$(0).");
-            }else if(i == rainSeasons.size()-2) {
-                rainInfo.append("$(0) ").append("$(seasonsextrastranslate:patchouli.seasonsextras.and)").append(" ");
-            }else{
-                rainInfo.append("$(0), ");
+        if(rainSeasons.size() == 4) {
+            rainInfo.append("$(seasonsextrastranslate:patchouli.seasonsextras.all_seasons)");
+        }else{
+            for(int i = 0; i < rainSeasons.size(); i++) {
+                Season season = rainSeasons.get(i);
+                rainInfo.append("$(").append(season.getDarkFormatting().getCode()).append(")$(seasonsextrastranslate:").append(season.getTranslationKey()).append(")");
+                if(i == rainSeasons.size()-1) {
+                    rainInfo.append("$(0).");
+                }else if(i == rainSeasons.size()-2) {
+                    rainInfo.append("$(0) ").append("$(seasonsextrastranslate:patchouli.seasonsextras.and)").append(" ");
+                }else{
+                    rainInfo.append("$(0), ");
+                }
             }
         }
 
         StringBuilder snowInfo = new StringBuilder(snowSeasons.isEmpty() ? "$(seasonsextrastranslate:patchouli.seasonsextras.doesnotsnow)" : "$(seasonsextrastranslate:patchouli.seasonsextras.snowsduring)"+" ");
-        for(int i = 0; i < snowSeasons.size(); i++) {
-            Season season = snowSeasons.get(i);
-            snowInfo.append("$(").append(season.getDarkFormatting().getCode()).append(")$(seasonsextrastranslate:").append(season.getTranslationKey()).append(")");
-            if(i == snowSeasons.size()-1) {
-                snowInfo.append("$(0).");
-            }else if(i == snowSeasons.size()-2) {
-                snowInfo.append("$(0) ").append("$(seasonsextrastranslate:patchouli.seasonsextras.and)").append(" ");
-            }else{
-                snowInfo.append("$(0), ");
+        if(snowSeasons.size() == 4) {
+            snowInfo.append("$(seasonsextrastranslate:patchouli.seasonsextras.all_seasons)");
+        }else {
+            for (int i = 0; i < snowSeasons.size(); i++) {
+                Season season = snowSeasons.get(i);
+                snowInfo.append("$(").append(season.getDarkFormatting().getCode()).append(")$(seasonsextrastranslate:").append(season.getTranslationKey()).append(")");
+                if (i == snowSeasons.size() - 1) {
+                    snowInfo.append("$(0).");
+                } else if (i == snowSeasons.size() - 2) {
+                    snowInfo.append("$(0) ").append("$(seasonsextrastranslate:patchouli.seasonsextras.and)").append(" ");
+                } else {
+                    snowInfo.append("$(0), ");
+                }
             }
         }
 

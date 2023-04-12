@@ -1,11 +1,14 @@
 package io.github.lucaargolo.seasonsextras.item;
 
+import io.github.lucaargolo.seasons.FabricSeasons;
 import io.github.lucaargolo.seasonsextras.block.GreenhouseGlassBlock;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,7 +33,15 @@ public class GreenHouseGlassItem extends BlockItem {
             tooltip.add(Text.translatable("tooltip.seasonsextras.warm_glass_1").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
             tooltip.add(Text.translatable("tooltip.seasonsextras.warm_glass_2").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
         }
+        if(!FabricSeasons.CONFIG.isSeasonMessingCrops()) {
+            tooltip.add(Text.translatable("tooltip.seasonsextras.not_enabled").formatted(Formatting.RED, Formatting.ITALIC));
+        }
+    }
 
+    @Override
+    public void appendStacks(ItemGroup group, DefaultedList<ItemStack> stacks) {
+        if(!FabricSeasons.CONFIG.isSeasonMessingCrops()) return;
+        super.appendStacks(group, stacks);
     }
 
 

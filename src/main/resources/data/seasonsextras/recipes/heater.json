@@ -25,5 +25,10 @@
   "result": {
     "item": "seasonsextras:heater",
     "count": 1
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "seasonsextras:is_season_messing_crops"
+    }
+  ]
 }

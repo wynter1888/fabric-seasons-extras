@@ -1,0 +1,30 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "seasonsextras:crop_season_tester"
+    ]
+  },
+  "criteria": {
+    "has_iron": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:iron_ingot"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_iron"
+    ]
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "seasonsextras:is_season_messing_crops"
+    }
+  ]
+}

@@ -47,6 +47,7 @@
   "tooltip.seasonsextras.tester_result_enabled_2": "grow as if it were %s",
   "tooltip.seasonsextras.tester_result_crop_1": "This crop will grow at %sx",
   "tooltip.seasonsextras.tester_result_crop_2": "its regular speed. (%s)",
+  "tooltip.seasonsextras.not_enabled": "This feature is not enabled.",
 
   "screen.seasonsextras.enable_particles": "Enable particles",
   "screen.seasonsextras.disable_particles": "Disable particles",
@@ -93,8 +94,14 @@
   "patchouli.seasonsextras.notgrowduring": "Won't grow during",
   "patchouli.seasonsextras.multiplier": "Multiplier",
   "patchouli.seasonsextras.greenhouse_glass": "Greenhouse Glass",
+  "patchouli.seasonsextras.modifications": "Modifications",
+  "patchouli.seasonsextras.modifications_info": "Info about seasonal changes.",
+  "patchouli.seasonsextras.resources": "Resources",
+  "patchouli.seasonsextras.resources_info": "Blocks and items to help you.",
+  "patchouli.seasonsextras.all_seasons": "all seasons.",
+
 
   "patchouli.seasonsextras.landing_text": "This is a complete guide about the seasonal changes added by the Fabric Seasons mod.$(br2)You'll find information on how seasons affect your game's biomes and crop behavior throughout the year.$(br2)You'll also find all the new blocks and items added by the mod and how you can use them.",
   "patchouli.seasonsextras.crops_text": "Crops are Minecraft plants that are cultivated for food, resource, or other purposes.$(br2)Fabric Seasons adds seasons to the game, adding more realism to crop growth.$(br2)Crops will grow at different speeds depending on the current season.",
-  "patchouli.seasonsextras.biome_text": "Biomes are areas of Minecraft worlds that have similar climates, flora and fauna.$(br2)Fabric Seasons adds seasons to the game, dynamically changing biomes as you play.$(br2)Biomes will have different temperatures and weather depending on the current season."
+  "patchouli.seasonsextras.biomes_text": "Biomes are areas of Minecraft worlds that have similar climates, flora and fauna.$(br2)Fabric Seasons adds seasons to the game, dynamically changing biomes as you play.$(br2)Biomes will have different temperatures and weather depending on the current season."
 }

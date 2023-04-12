@@ -16,5 +16,10 @@
   "result": {
     "item": "seasonsextras:purple_greenhouse_glass",
     "count": 4
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "seasonsextras:is_season_messing_crops"
+    }
+  ]
 }

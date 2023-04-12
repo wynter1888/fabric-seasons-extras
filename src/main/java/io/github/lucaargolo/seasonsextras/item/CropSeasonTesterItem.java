@@ -11,6 +11,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.network.PacketByteBuf;
@@ -19,6 +20,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
@@ -46,7 +48,7 @@ public class CropSeasonTesterItem extends Item {
                 PacketByteBuf buf = PacketByteBufs.create();
                 buf.writeBlockPos(blockPos);
                 buf.writeInt(2);
-                if(FabricSeasons.CONFIG.doCropsGrowsNormallyUnderground() && serverWorld.getLightLevel(LightType.SKY, blockPos.up()) == 0) {
+                if(!FabricSeasons.CONFIG.isSeasonMessingCrops() || (FabricSeasons.CONFIG.doCropsGrowsNormallyUnderground() && serverWorld.getLightLevel(LightType.SKY, blockPos.up()) == 0)) {
                     buf.writeText(Text.translatable("tooltip.seasonsextras.tester_result_disabled_1"));
                     buf.writeText(Text.translatable("tooltip.seasonsextras.tester_result_disabled_2"));
                 } else if(!player.isSneaking() && FabricSeasons.SEEDS_MAP.containsValue(blockState.getBlock())) {
@@ -68,6 +70,14 @@ public class CropSeasonTesterItem extends Item {
         super.appendTooltip(stack, world, tooltip, context);
         tooltip.add(Text.translatable("tooltip.seasonsextras.crop_tester_1").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
         tooltip.add(Text.translatable("tooltip.seasonsextras.crop_tester_2").formatted(Formatting.LIGHT_PURPLE, Formatting.ITALIC));
+        if(!FabricSeasons.CONFIG.isSeasonMessingCrops()) {
+            tooltip.add(Text.translatable("tooltip.seasonsextras.not_enabled").formatted(Formatting.RED, Formatting.ITALIC));
+        }
+    }
 
+    @Override
+    public void appendStacks(ItemGroup group, DefaultedList<ItemStack> stacks) {
+        if(!FabricSeasons.CONFIG.isSeasonMessingCrops()) return;
+        super.appendStacks(group, stacks);
     }
 }

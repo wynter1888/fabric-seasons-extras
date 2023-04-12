@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "seasonsextras:season_detector"
+    "seasonsextras:season_detector",
+    "seasonsextras:season_calendar"
   ]
 }
