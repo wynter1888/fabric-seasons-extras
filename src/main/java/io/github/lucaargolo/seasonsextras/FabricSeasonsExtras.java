@@ -27,11 +27,13 @@ import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.FilteringStorage;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.network.PacketByteBuf;
@@ -62,7 +64,6 @@ public class FabricSeasonsExtras implements ModInitializer {
     public static final String MOD_ID = "seasonsextras";
 
     //TODO: Add patchouli entries for blocks/items
-    //TODO: Make patchouli optional
 
     //Block Entities
     public static BlockEntityType<SeasonDetectorBlockEntity> SEASON_DETECTOR_TYPE = null;
@@ -141,8 +142,11 @@ public class FabricSeasonsExtras implements ModInitializer {
             });
         });
 
-        ItemStorage.SIDED.registerForBlockEntity((entity, direction) -> InventoryStorage.of(entity.getInputInventory(), direction), AIR_CONDITIONING_TYPE);
-        ItemStorage.SIDED.registerForBlockEntity((entity, direction) -> FilteringStorage.extractOnlyOf(InventoryStorage.of(entity.getModuleInventory(), direction)), AIR_CONDITIONING_TYPE);
+        ItemStorage.SIDED.registerForBlockEntity((entity, direction) -> {
+            Storage<ItemVariant> inputStorage = InventoryStorage.of(entity.getInputInventory(), direction);
+            Storage<ItemVariant> moduleStorage = FilteringStorage.extractOnlyOf(InventoryStorage.of(entity.getModuleInventory(), direction));
+            return new CombinedStorage<>(List.of(inputStorage, moduleStorage));
+        }, AIR_CONDITIONING_TYPE);
 
         ResourceConditions.register(new ModIdentifier("is_season_messing_crops"), json -> FabricSeasons.CONFIG.isSeasonMessingCrops());
     }

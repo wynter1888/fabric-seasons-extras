@@ -1,4 +1,4 @@
-package io.github.lucaargolo.seasonsextras.mixed;
+package io.github.lucaargolo.seasonsextras.patchouli.mixed;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.text.Style;

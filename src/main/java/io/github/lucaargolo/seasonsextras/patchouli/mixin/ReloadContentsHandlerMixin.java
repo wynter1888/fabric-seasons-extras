@@ -1,4 +1,4 @@
-package io.github.lucaargolo.seasonsextras.mixin;
+package io.github.lucaargolo.seasonsextras.patchouli.mixin;
 
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
 import net.minecraft.server.MinecraftServer;

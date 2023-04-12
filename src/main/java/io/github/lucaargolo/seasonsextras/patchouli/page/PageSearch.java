@@ -1,8 +1,8 @@
 package io.github.lucaargolo.seasonsextras.patchouli.page;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import io.github.lucaargolo.seasonsextras.mixed.FontManagerMixed;
-import io.github.lucaargolo.seasonsextras.mixin.MinecraftClientAccessor;
+import io.github.lucaargolo.seasonsextras.patchouli.mixed.FontManagerMixed;
+import io.github.lucaargolo.seasonsextras.patchouli.mixin.MinecraftClientAccessor;
 import io.github.lucaargolo.seasonsextras.utils.Tickable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;

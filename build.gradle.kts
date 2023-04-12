@@ -87,7 +87,7 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project["fabric_version"]}")
 
     modImplementation("io.github.lucaargolo:fabric-seasons:${project["seasons_version"]}")
-    modImplementation("vazkii.patchouli:Patchouli:${project["patchouli_version"]}")
+    modCompileOnly("vazkii.patchouli:Patchouli:${project["patchouli_version"]}")
 }
 
 tasks.processResources {

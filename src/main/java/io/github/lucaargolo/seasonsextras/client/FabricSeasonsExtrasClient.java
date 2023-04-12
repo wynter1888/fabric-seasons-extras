@@ -7,16 +7,17 @@ import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
 import io.github.lucaargolo.seasonsextras.block.GreenhouseGlassBlock;
 import io.github.lucaargolo.seasonsextras.client.screen.AirConditioningScreen;
-import io.github.lucaargolo.seasonsextras.mixin.GuiBookEntryAccessor;
 import io.github.lucaargolo.seasonsextras.patchouli.FabricSeasonsExtrasPatchouliCompat;
-import io.github.lucaargolo.seasonsextras.utils.TooltipRenderer;
+import io.github.lucaargolo.seasonsextras.patchouli.mixin.GuiBookEntryAccessor;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
 import io.github.lucaargolo.seasonsextras.utils.Tickable;
+import io.github.lucaargolo.seasonsextras.utils.TooltipRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
@@ -52,21 +53,6 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if(client.currentScreen == null) {
-                FabricSeasonsExtrasClient.multiblockBiomeOverride = null;
-                FabricSeasonsExtrasClient.multiblockSeasonOverride = null;
-            }else{
-                if(client.currentScreen instanceof GuiBookEntryAccessor bookEntry) {
-                    if(bookEntry.getLeftPage() instanceof Tickable page) {
-                        page.tick();
-                    }
-                    if(bookEntry.getRightPage() instanceof Tickable page) {
-                        page.tick();
-                    }
-                }
-            }
-        });
         ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_TESTED_SEASON_S2C, (client, handler, buf, responseSender) -> {
             BlockPos receivedTestedPos = buf.readBlockPos();
             List<Text> receivedTooltip = new ArrayList<>();
@@ -167,7 +153,24 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
             MinecraftClient client = MinecraftClient.getInstance();
             TooltipRenderer.render(client, matrixStack, tickDelta);
         }));
-        FabricSeasonsExtrasPatchouliCompat.onInitializeClient();
+        if(FabricLoader.getInstance().isModLoaded("patchouli")) {
+            FabricSeasonsExtrasPatchouliCompat.onInitializeClient();
+            ClientTickEvents.END_CLIENT_TICK.register(client -> {
+                if(client.currentScreen == null) {
+                    FabricSeasonsExtrasClient.multiblockBiomeOverride = null;
+                    FabricSeasonsExtrasClient.multiblockSeasonOverride = null;
+                }else{
+                    if(client.currentScreen instanceof GuiBookEntryAccessor bookEntry) {
+                        if(bookEntry.getLeftPage() instanceof Tickable page) {
+                            page.tick();
+                        }
+                        if(bookEntry.getRightPage() instanceof Tickable page) {
+                            page.tick();
+                        }
+                    }
+                }
+            });
+        }
     }
 
     //I don't know what this is but it kind of works

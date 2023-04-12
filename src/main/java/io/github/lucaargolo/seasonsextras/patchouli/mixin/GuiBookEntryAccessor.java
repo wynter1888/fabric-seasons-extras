@@ -1,4 +1,4 @@
-package io.github.lucaargolo.seasonsextras.mixin;
+package io.github.lucaargolo.seasonsextras.patchouli.mixin;
 
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;

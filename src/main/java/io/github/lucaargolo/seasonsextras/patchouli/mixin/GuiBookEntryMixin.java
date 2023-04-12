@@ -1,4 +1,4 @@
-package io.github.lucaargolo.seasonsextras.mixin;
+package io.github.lucaargolo.seasonsextras.patchouli.mixin;
 
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;

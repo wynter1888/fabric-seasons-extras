@@ -20,5 +20,13 @@
   "result": {
     "item": "seasonsextras:seasonal_compendium",
     "count": 1
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "patchouli"
+      ]
+    }
+  ]
 }
