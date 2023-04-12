@@ -1,8 +1,0 @@
-{
-  "name": "patchouli.seasonsextras.items",
-  "category": "seasonsextras:compendium",
-  "icon": "seasonsextras:season_calendar",
-  "pages": [],
-  "read_by_default": true,
-  "sortnum": 3
-}

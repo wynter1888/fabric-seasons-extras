@@ -4,11 +4,13 @@
   "icon": "minecraft:wheat",
   "pages": [
     {
-      "type": "patchouli:empty"
+      "type": "patchouli:text",
+      "title": "patchouli.seasonsextras.crops",
+      "text": "patchouli.seasonsextras.crops_text"
     },
     {
       "type": "seasonsextras:crop_search",
-      "title": "patchouli.seasonsextras.crops"
+      "title": "patchouli.seasonsextras.entries"
     },
     {
       "type": "seasonsextras:modifiable",

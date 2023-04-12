@@ -1,0 +1,14 @@
+{
+  "name": "block.seasonsextras.season_detector",
+  "category": "seasonsextras:compendium",
+  "icon": "seasonsextras:season_detector",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "block.seasonsextras.season_detector",
+      "text": ""
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 6
+}

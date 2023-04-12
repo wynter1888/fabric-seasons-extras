@@ -15,6 +15,7 @@
     "GuiBookAccessor",
     "GuiBookEntryAccessor",
     "GuiBookEntryMixin",
+    "GuiBookLandingMixin",
     "MinecraftClientAccessor",
     "MouseMixin",
     "PageMultiblockAccessor"

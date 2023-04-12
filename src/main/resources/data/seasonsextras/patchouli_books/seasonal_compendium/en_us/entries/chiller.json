@@ -1,0 +1,14 @@
+{
+  "name": "block.seasonsextras.chiller",
+  "category": "seasonsextras:compendium",
+  "icon": "seasonsextras:chiller",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "block.seasonsextras.chiller",
+      "text": ""
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 5
+}

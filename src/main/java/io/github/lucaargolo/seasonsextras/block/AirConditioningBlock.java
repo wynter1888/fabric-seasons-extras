@@ -52,6 +52,10 @@ public class AirConditioningBlock extends BlockWithEntity {
         this.setDefaultState(this.getDefaultState().with(LEVEL, 0).with(FACING, Direction.NORTH));
     }
 
+    public Conditioning getConditioning() {
+        return conditioning;
+    }
+
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         super.appendProperties(builder);

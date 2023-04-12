@@ -1,0 +1,14 @@
+{
+  "name": "patchouli.seasonsextras.greenhouse_glass",
+  "category": "seasonsextras:compendium",
+  "icon": "seasonsextras:green_greenhouse_glass",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "patchouli.seasonsextras.greenhouse_glass",
+      "text": ""
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 2
+}

@@ -1,0 +1,14 @@
+{
+  "name": "block.seasonsextras.tinted_greenhouse_glass",
+  "category": "seasonsextras:compendium",
+  "icon": "seasonsextras:tinted_greenhouse_glass",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "block.seasonsextras.tinted_greenhouse_glass",
+      "text": ""
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 3
+}

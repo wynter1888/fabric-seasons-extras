@@ -1,6 +1,6 @@
 {
   "name": "item.seasonsextras.seasonal_compendium",
-  "landing_text": "Hello World",
+  "landing_text": "patchouli.seasonsextras.landing_text",
   "dont_generate_book": true,
   "custom_book_item": "seasonsextras:seasonal_compendium",
   "show_progress": false,

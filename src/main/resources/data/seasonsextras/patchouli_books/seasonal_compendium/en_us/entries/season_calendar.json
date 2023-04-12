@@ -1,0 +1,14 @@
+{
+  "name": "block.seasonsextras.season_calendar",
+  "category": "seasonsextras:compendium",
+  "icon": "seasonsextras:season_calendar",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "block.seasonsextras.season_calendar",
+      "text": ""
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 7
+}
