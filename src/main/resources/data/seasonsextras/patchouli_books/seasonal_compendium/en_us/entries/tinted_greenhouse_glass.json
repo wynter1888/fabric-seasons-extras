@@ -6,7 +6,13 @@
     {
       "type": "patchouli:text",
       "title": "block.seasonsextras.tinted_greenhouse_glass",
-      "text": ""
+      "text": "patchouli.seasonsextras.tinted_text"
+    },
+    {
+      "type": "patchouli:crafting",
+      "title": "patchouli.seasonsextras.recipe",
+      "text": "patchouli.seasonsextras.tinted_extra",
+      "recipe": "seasonsextras:tinted_greenhouse_glass"
     }
   ],
   "read_by_default": true,

@@ -36,6 +36,7 @@ public class FabricSeasonsExtrasPatchouliCompat {
         ClientBookRegistry.INSTANCE.pageTypes.put(new ModIdentifier("seasonal_biome"), PageSeasonalBiome.class);
         ClientBookRegistry.INSTANCE.pageTypes.put(new ModIdentifier("biome_description"), PageBiomeDescription.class);
         ClientBookRegistry.INSTANCE.pageTypes.put(new ModIdentifier("crop_search"), PageCropSearch.class);
+        ClientBookRegistry.INSTANCE.pageTypes.put(new ModIdentifier("multiple_crafting"), PageMultipleCrafting.class);
 
 
         BookTextParser.register((parameter, state) -> FabricSeasonsExtrasClient.prefersCelsius ? FabricSeasonsExtrasClient.minecraftToCelsius(parameter) : FabricSeasonsExtrasClient.minecraftToFahrenheit(parameter), "seasonsextrastemperature");
