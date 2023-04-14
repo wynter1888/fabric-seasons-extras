@@ -6,7 +6,13 @@
     {
       "type": "patchouli:text",
       "title": "block.seasonsextras.season_detector",
-      "text": ""
+      "text": "patchouli.seasonsextras.detector_text"
+    },
+    {
+      "type": "patchouli:crafting",
+      "title": "patchouli.seasonsextras.recipe",
+      "text": "patchouli.seasonsextras.detector_extra",
+      "recipe": "seasonsextras:season_detector"
     }
   ],
   "read_by_default": true,

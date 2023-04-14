@@ -6,7 +6,13 @@
     {
       "type": "patchouli:text",
       "title": "block.seasonsextras.heater",
-      "text": ""
+      "text": "patchouli.seasonsextras.heater_text"
+    },
+    {
+      "type": "patchouli:crafting",
+      "title": "patchouli.seasonsextras.recipe",
+      "text": "patchouli.seasonsextras.heater_extra",
+      "recipe": "seasonsextras:heater"
     }
   ],
   "read_by_default": true,

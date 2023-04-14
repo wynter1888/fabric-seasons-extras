@@ -63,8 +63,6 @@ public class FabricSeasonsExtras implements ModInitializer {
     private static final HashMap<Identifier, JsonObject> multiblockCache = new HashMap<>();
     public static final String MOD_ID = "seasonsextras";
 
-    //TODO: Add patchouli entries for blocks/items
-
     //Block Entities
     public static BlockEntityType<SeasonDetectorBlockEntity> SEASON_DETECTOR_TYPE = null;
     public static BlockEntityType<SeasonCalendarBlockEntity> SEASON_CALENDAR_TYPE = null;

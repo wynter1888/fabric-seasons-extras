@@ -5,8 +5,14 @@
   "pages": [
     {
       "type": "patchouli:text",
-      "title": "item.seasonsextras.crop_season_tester",
-      "text": ""
+      "title": "block.seasonsextras.crop_season_tester",
+      "text": "patchouli.seasonsextras.tester_text"
+    },
+    {
+      "type": "patchouli:crafting",
+      "title": "patchouli.seasonsextras.recipe",
+      "text": "patchouli.seasonsextras.tester_extra",
+      "recipe": "seasonsextras:crop_season_tester"
     }
   ],
   "read_by_default": true,
