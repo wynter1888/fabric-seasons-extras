@@ -65,7 +65,7 @@ public class GuiBookLandingMixin extends GuiBook {
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "init")
+    @Inject(at = @At("TAIL"), method = "init", remap = true)
     public void captureText(CallbackInfo ci) {
         if(capturedBook.id.equals(new ModIdentifier("seasonal_compendium"))) {
             capuredText = text;
@@ -119,7 +119,7 @@ public class GuiBookLandingMixin extends GuiBook {
         }
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lvazkii/patchouli/client/book/gui/button/GuiButtonEntry;<init>(Lvazkii/patchouli/client/book/gui/GuiBook;IILvazkii/patchouli/client/book/BookEntry;Lnet/minecraft/client/gui/widget/ButtonWidget$PressAction;)V", shift = At.Shift.BEFORE), method = "addEntryButtons", locals = LocalCapture.CAPTURE_FAILSOFT)
+    @Inject(at = @At(value = "INVOKE", target = "Lvazkii/patchouli/client/book/gui/button/GuiButtonEntry;<init>(Lvazkii/patchouli/client/book/gui/GuiBook;IILvazkii/patchouli/client/book/BookEntry;Lnet/minecraft/client/gui/widget/ButtonWidget$PressAction;)V", shift = At.Shift.BEFORE, remap = true), method = "addEntryButtons", locals = LocalCapture.CAPTURE_FAILSOFT)
     public void collectEntry(int x, int y, int start, int count, CallbackInfo ci, int i) {
         if(capturedBook.id.equals(new ModIdentifier("seasonal_compendium"))) {
             if (spread != 0 && i-start < 13) {
@@ -130,7 +130,7 @@ public class GuiBookLandingMixin extends GuiBook {
         }
     }
 
-    @ModifyArg(at = @At(value = "INVOKE", target = "Lvazkii/patchouli/client/book/gui/button/GuiButtonEntry;<init>(Lvazkii/patchouli/client/book/gui/GuiBook;IILvazkii/patchouli/client/book/BookEntry;Lnet/minecraft/client/gui/widget/ButtonWidget$PressAction;)V"), method = "addEntryButtons", index = 1)
+    @ModifyArg(at = @At(value = "INVOKE", target = "Lvazkii/patchouli/client/book/gui/button/GuiButtonEntry;<init>(Lvazkii/patchouli/client/book/gui/GuiBook;IILvazkii/patchouli/client/book/BookEntry;Lnet/minecraft/client/gui/widget/ButtonWidget$PressAction;)V", remap = true), method = "addEntryButtons", index = 1)
     public int fixEntryX(int x) {
         if(capturedBook.id.equals(new ModIdentifier("seasonal_compendium"))) {
             return entryX;
@@ -164,7 +164,7 @@ public class GuiBookLandingMixin extends GuiBook {
             }
         }
     }
-    @Inject(at = @At(value = "INVOKE", target = "Lvazkii/patchouli/client/book/gui/GuiBookLanding;drawFromTexture(Lnet/minecraft/client/util/math/MatrixStack;Lvazkii/patchouli/common/book/Book;IIIIII)V"), method = "drawHeader", cancellable = true)
+    @Inject(at = @At(value = "INVOKE", target = "Lvazkii/patchouli/client/book/gui/GuiBookLanding;drawFromTexture(Lnet/minecraft/client/util/math/MatrixStack;Lvazkii/patchouli/common/book/Book;IIIIII)V", remap = true), method = "drawHeader", cancellable = true)
     public void drawExtraHeaders(MatrixStack ms, CallbackInfo ci) {
         if(capturedBook.id.equals(new ModIdentifier("seasonal_compendium"))) {
             if (spread == 0) {

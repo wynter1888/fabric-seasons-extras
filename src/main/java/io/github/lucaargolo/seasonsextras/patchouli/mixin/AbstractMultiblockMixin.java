@@ -21,7 +21,7 @@ public class AbstractMultiblockMixin {
     @Shadow
     World world;
 
-    @Inject(at = @At("HEAD"), method = "getColor", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "getColor", cancellable = true, remap = true)
     private void overrideMultiblockBiome(BlockPos pos, ColorResolver color, CallbackInfoReturnable<Integer> cir) {
         if(FabricSeasonsExtrasClient.multiblockBiomeOverride != null) {
             Optional<Biome> optional = world.getRegistryManager().get(Registry.BIOME_KEY).getOrEmpty(FabricSeasonsExtrasClient.multiblockBiomeOverride);

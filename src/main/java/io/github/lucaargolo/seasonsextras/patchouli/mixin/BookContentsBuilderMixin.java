@@ -22,7 +22,7 @@ import java.util.function.Function;
 @Mixin(value = BookContentsBuilder.class, remap = false)
 public class BookContentsBuilderMixin {
 
-    @Inject(at = @At(value = "INVOKE", target = "Lvazkii/patchouli/client/book/BookEntry;<init>(Lcom/google/gson/JsonObject;Lnet/minecraft/util/Identifier;Lvazkii/patchouli/common/book/Book;)V"), method = "loadEntry", locals = LocalCapture.CAPTURE_FAILSOFT)
+    @Inject(at = @At(value = "INVOKE", target = "Lvazkii/patchouli/client/book/BookEntry;<init>(Lcom/google/gson/JsonObject;Lnet/minecraft/util/Identifier;Lvazkii/patchouli/common/book/Book;)V", remap = true), method = "loadEntry", locals = LocalCapture.CAPTURE_FAILSOFT)
     private static void injectPagesAtLoad(Book book, BookContentLoader loader, Identifier id, Identifier file, Function<Identifier, BookCategory> categories, CallbackInfoReturnable<@Nullable BookEntry> cir, JsonElement json) {
         if(json.isJsonObject()) {
             JsonObject object = json.getAsJsonObject();

@@ -18,7 +18,7 @@ public abstract class GuiBookEntryMixin extends GuiBook {
         super(book, title);
     }
 
-    @Inject(at = @At("HEAD"), method = "keyPressed", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "keyPressed", cancellable = true, remap = true)
     public void fixSearchBar(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE && this.shouldCloseOnEsc()) {
             this.close();
