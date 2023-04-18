@@ -32,5 +32,12 @@
     "fabric": ">=0.56.1",
     "seasons": ">=2.0-BETA",
     "minecraft": "1.19.x"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.com/invite/G4PjhEf"
+      }
+    }
   }
 }
