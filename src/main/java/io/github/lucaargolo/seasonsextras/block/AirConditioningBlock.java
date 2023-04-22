@@ -64,7 +64,7 @@ public class AirConditioningBlock extends BlockWithEntity {
     }
 
     public BlockState getPlacementState(ItemPlacementContext ctx) {
-        Direction facing = ctx.getSide().getAxis() != Direction.Axis.Y ? ctx.getSide() : ctx.getPlayerFacing().getOpposite();
+        Direction facing = ctx.getSide().getAxis() != Direction.Axis.Y ? ctx.getSide() : ctx.getHorizontalPlayerFacing().getOpposite();
         return this.getDefaultState().with(FACING, facing);
     }
 

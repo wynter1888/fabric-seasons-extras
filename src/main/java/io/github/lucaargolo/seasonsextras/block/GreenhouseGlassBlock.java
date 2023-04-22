@@ -55,7 +55,7 @@ public class GreenhouseGlassBlock extends BlockWithEntity {
     }
 
     @Override
-    public boolean isTranslucent(BlockState state, BlockView world, BlockPos pos) {
+    public boolean isTransparent(BlockState state, BlockView world, BlockPos pos) {
         return inverted;
     }
 

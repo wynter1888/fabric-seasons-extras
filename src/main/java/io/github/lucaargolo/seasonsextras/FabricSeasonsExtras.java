@@ -97,7 +97,7 @@ public class FabricSeasonsExtras implements ModInitializer {
     private static final List<Pair<Predicate<Item>, Item>> creativeTabItems = new ArrayList<>();
     private static final ItemGroup CREATIVE_TAB = FabricItemGroup.builder(new ModIdentifier("creative_tab"))
             .icon(() -> SEASON_CALENDAR_ITEM.getDefaultStack())
-            .entries((enabledFeatures, entries, operatorEnabled) -> {
+            .entries((displayContext, entries) -> {
                 creativeTabItems.forEach(pair -> {
                     Item item = pair.getRight();
                     if(pair.getLeft().test(item)) {

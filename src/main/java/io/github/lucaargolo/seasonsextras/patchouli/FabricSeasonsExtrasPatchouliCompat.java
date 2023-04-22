@@ -75,37 +75,24 @@ public class FabricSeasonsExtrasPatchouliCompat {
 
         String biomeName = biomeId.toTranslationKey("biome");
         boolean isJungle = entry.isIn(BiomeTags.IS_JUNGLE) || entry.isIn(BiomeTags.HAS_CLOSER_WATER_FOG);
-        Pair<Biome.Precipitation, Float> springPair = FabricSeasons.getSeasonWeather(Season.SPRING, biomeId, isJungle, biome.getPrecipitation(),biome.getTemperature());
-        Pair<Biome.Precipitation, Float> summerPair = FabricSeasons.getSeasonWeather(Season.SUMMER, biomeId, isJungle, biome.getPrecipitation(),biome.getTemperature());
-        Pair<Biome.Precipitation, Float> fallPair = FabricSeasons.getSeasonWeather(Season.FALL, biomeId, isJungle, biome.getPrecipitation(),biome.getTemperature());
-        Pair<Biome.Precipitation, Float> winterPair = FabricSeasons.getSeasonWeather(Season.WINTER, biomeId, isJungle, biome.getPrecipitation(),biome.getTemperature());
+        Pair<Boolean, Float> springPair = FabricSeasons.getSeasonWeather(Season.SPRING, biomeId, isJungle, biome.hasPrecipitation(),biome.getTemperature());
+        Pair<Boolean, Float> summerPair = FabricSeasons.getSeasonWeather(Season.SUMMER, biomeId, isJungle, biome.hasPrecipitation(),biome.getTemperature());
+        Pair<Boolean, Float> fallPair = FabricSeasons.getSeasonWeather(Season.FALL, biomeId, isJungle, biome.hasPrecipitation(),biome.getTemperature());
+        Pair<Boolean, Float> winterPair = FabricSeasons.getSeasonWeather(Season.WINTER, biomeId, isJungle, biome.hasPrecipitation(),biome.getTemperature());
 
         List<Season> rainSeasons = new ArrayList<>();
-        if(springPair.getLeft().equals(Biome.Precipitation.RAIN)) {
-            rainSeasons.add(Season.SPRING);
-        }
-        if(summerPair.getLeft().equals(Biome.Precipitation.RAIN)) {
-            rainSeasons.add(Season.SUMMER);
-        }
-        if(fallPair.getLeft().equals(Biome.Precipitation.RAIN)) {
-            rainSeasons.add(Season.FALL);
-        }
-        if(winterPair.getLeft().equals(Biome.Precipitation.RAIN)) {
-            rainSeasons.add(Season.WINTER);
-        }
-
         List<Season> snowSeasons = new ArrayList<>();
-        if(springPair.getLeft().equals(Biome.Precipitation.SNOW)) {
-            snowSeasons.add(Season.SPRING);
+        if(springPair.getLeft()) {
+            if(springPair.getRight() < 0.15f) snowSeasons.add(Season.SPRING); else rainSeasons.add(Season.SPRING);
         }
-        if(summerPair.getLeft().equals(Biome.Precipitation.SNOW)) {
-            snowSeasons.add(Season.SUMMER);
+        if(summerPair.getLeft()) {
+            if(springPair.getRight() < 0.15f) snowSeasons.add(Season.SUMMER); else rainSeasons.add(Season.SUMMER);
         }
-        if(fallPair.getLeft().equals(Biome.Precipitation.SNOW)) {
-            snowSeasons.add(Season.FALL);
+        if(fallPair.getLeft()) {
+            if(springPair.getRight() < 0.15f) snowSeasons.add(Season.FALL); else rainSeasons.add(Season.FALL);
         }
-        if(winterPair.getLeft().equals(Biome.Precipitation.SNOW)) {
-            snowSeasons.add(Season.WINTER);
+        if(winterPair.getLeft()) {
+            if(springPair.getRight() < 0.15f) snowSeasons.add(Season.WINTER); else rainSeasons.add(Season.WINTER);
         }
 
         String springTemperature = "$(seasonsextrastemperature:"+springPair.getRight()+")";
