@@ -10,11 +10,11 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 import vazkii.patchouli.client.book.BookContentsBuilder;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.page.PageMultiblock;
@@ -61,7 +61,7 @@ public class PageSeasonalBiome extends PageMultiblock implements Tickable {
 
         FabricSeasonsExtrasClient.multiblockSeasonOverride = selectedSeason;
         if(biomeId != null) {
-            FabricSeasonsExtrasClient.multiblockBiomeOverride = RegistryKey.of(Registry.BIOME_KEY, biomeId);
+            FabricSeasonsExtrasClient.multiblockBiomeOverride = RegistryKey.of(RegistryKeys.BIOME, biomeId);
         }
         super.render(ms, mouseX, mouseY, pticks);
         FabricSeasonsExtrasClient.multiblockBiomeOverride = null;

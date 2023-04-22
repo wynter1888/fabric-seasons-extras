@@ -1,9 +1,9 @@
 package io.github.lucaargolo.seasonsextras.patchouli.page;
 
 import io.github.lucaargolo.seasons.FabricSeasons;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
-import net.minecraft.util.registry.Registry;
 import vazkii.patchouli.client.book.gui.GuiBookEntry;
 
 import java.util.Comparator;
@@ -18,7 +18,7 @@ public class PageCropSearch extends PageSearch {
     @Override
     public void onDisplayed(GuiBookEntry parent, int left, int top) {
         searchable.clear();
-        FabricSeasons.SEEDS_MAP.values().stream().map(crop -> Map.entry(crop, Registry.BLOCK.getId(crop))).sorted(Map.Entry.comparingByValue()).forEach(entry -> {
+        FabricSeasons.SEEDS_MAP.values().stream().map(crop -> Map.entry(crop, Registries.BLOCK.getId(crop))).sorted(Map.Entry.comparingByValue()).forEach(entry -> {
             String name = Text.translatable(entry.getKey().getTranslationKey()).getString();
             searchable.add(new Pair<>(entry.getValue(), name));
         });

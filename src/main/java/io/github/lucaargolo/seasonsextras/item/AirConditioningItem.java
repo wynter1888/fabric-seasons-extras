@@ -35,11 +35,4 @@ public class AirConditioningItem extends BlockItem {
         }
     }
 
-    @Override
-    public void appendStacks(ItemGroup group, DefaultedList<ItemStack> stacks) {
-        if(!FabricSeasons.CONFIG.isSeasonMessingCrops()) return;
-        super.appendStacks(group, stacks);
-    }
-
-
 }

@@ -3,10 +3,10 @@ package io.github.lucaargolo.seasonsextras.patchouli.page;
 import io.github.lucaargolo.seasonsextras.client.FabricSeasonsExtrasClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import vazkii.patchouli.client.book.gui.GuiBookEntry;
 

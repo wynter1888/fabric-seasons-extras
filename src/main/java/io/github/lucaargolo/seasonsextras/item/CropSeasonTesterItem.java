@@ -75,9 +75,4 @@ public class CropSeasonTesterItem extends Item {
         }
     }
 
-    @Override
-    public void appendStacks(ItemGroup group, DefaultedList<ItemStack> stacks) {
-        if(!FabricSeasons.CONFIG.isSeasonMessingCrops()) return;
-        super.appendStacks(group, stacks);
-    }
 }

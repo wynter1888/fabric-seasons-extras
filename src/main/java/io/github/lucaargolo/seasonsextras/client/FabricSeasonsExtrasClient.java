@@ -24,12 +24,13 @@ import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
@@ -69,7 +70,7 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_VALID_BIOMES_S2C, (client, handler, buf, responseSender) -> {
             HashSet<Identifier> validBiomes = new HashSet<>();
             Identifier worldId = buf.readIdentifier();
-            RegistryKey<World> worldKey = RegistryKey.of(Registry.WORLD_KEY, worldId);
+            RegistryKey<World> worldKey = RegistryKey.of(RegistryKeys.WORLD, worldId);
             int size = buf.readInt();
             for(int i = 0; i < size; i++) {
                validBiomes.add(buf.readIdentifier());
@@ -77,7 +78,7 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
             client.execute(() -> {
                 worldValidBiomes.computeIfPresent(worldKey, (key, list) -> new LinkedHashSet<>());
                 validBiomes.stream().sorted(Comparator.comparing(Identifier::getPath)).forEach(biome -> {
-                    handler.getRegistryManager().get(Registry.BIOME_KEY).getEntry(RegistryKey.of(Registry.BIOME_KEY, biome)).ifPresent(entry -> {
+                    handler.getRegistryManager().get(RegistryKeys.BIOME).getEntry(RegistryKey.of(RegistryKeys.BIOME, biome)).ifPresent(entry -> {
                         worldValidBiomes.computeIfAbsent(worldKey, (key) -> new LinkedHashSet<>()).add(entry);
                     });
                 });
@@ -86,7 +87,7 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_BIOME_MULTIBLOCKS_S2C, (client, handler, buf, responseSender) -> {
             HashMap<Identifier, Set<Identifier>> biomeMultiblocks = new HashMap<>();
             Identifier worldId = buf.readIdentifier();
-            RegistryKey<World> worldKey = RegistryKey.of(Registry.WORLD_KEY, worldId);
+            RegistryKey<World> worldKey = RegistryKey.of(RegistryKeys.WORLD, worldId);
             int mapSize = buf.readInt();
             for(int m = 0; m < mapSize; m++) {
                 HashSet<Identifier> set = new HashSet<>();
@@ -148,7 +149,7 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
         for (GreenhouseGlassBlock block : FabricSeasonsExtras.GREENHOUSE_GLASS_BLOCKS) {
             BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getTranslucent());
         }
-        BlockRenderLayerMap.INSTANCE.putBlock(Registry.BLOCK.get(new ModIdentifier("season_calendar")), RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(Registries.BLOCK.get(new ModIdentifier("season_calendar")), RenderLayer.getCutout());
         HudRenderCallback.EVENT.register(((matrixStack, tickDelta) -> {
             MinecraftClient client = MinecraftClient.getInstance();
             TooltipRenderer.render(client, matrixStack, tickDelta);

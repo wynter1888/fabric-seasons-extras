@@ -15,12 +15,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Item;
-import net.minecraft.tag.BiomeTags;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import vazkii.patchouli.client.book.ClientBookRegistry;
@@ -58,9 +59,9 @@ public class FabricSeasonsExtrasPatchouliCompat {
             ClientWorld world = client.world;
             if(world != null) {
                 AtomicInteger offset = new AtomicInteger(0);
-                FabricSeasons.SEEDS_MAP.entrySet().stream().map(entry -> Map.entry(entry, Registry.BLOCK.getId(entry.getValue()))).sorted(Map.Entry.comparingByValue()).forEach((entry) -> {
-                    Identifier seedId = Registry.ITEM.getId(entry.getKey().getKey());
-                    Identifier cropId = Registry.BLOCK.getId(entry.getKey().getValue());
+                FabricSeasons.SEEDS_MAP.entrySet().stream().map(entry -> Map.entry(entry, Registries.BLOCK.getId(entry.getValue()))).sorted(Map.Entry.comparingByValue()).forEach((entry) -> {
+                    Identifier seedId = Registries.ITEM.getId(entry.getKey().getKey());
+                    Identifier cropId = Registries.BLOCK.getId(entry.getKey().getValue());
                     addSeasonalCropPage(pages, index+offset.getAndAdd(1), entry.getKey().getKey(), seedId, entry.getKey().getValue(), cropId);
                 });
             }
@@ -70,7 +71,7 @@ public class FabricSeasonsExtrasPatchouliCompat {
     private static void addSeasonalBiomePage(JsonArray pages, int index, RegistryKey<World> worldKey, RegistryEntry<Biome> entry) {
 
         Biome biome = entry.value();
-        Identifier biomeId = entry.getKey().orElse(RegistryKey.of(Registry.BIOME_KEY, new Identifier("plains"))).getValue();
+        Identifier biomeId = entry.getKey().orElse(RegistryKey.of(RegistryKeys.BIOME, new Identifier("plains"))).getValue();
 
         String biomeName = biomeId.toTranslationKey("biome");
         boolean isJungle = entry.isIn(BiomeTags.IS_JUNGLE) || entry.isIn(BiomeTags.HAS_CLOSER_WATER_FOG);

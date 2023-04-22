@@ -1,11 +1,11 @@
 package io.github.lucaargolo.seasonsextras.patchouli.mixin;
 
 import io.github.lucaargolo.seasonsextras.client.FabricSeasonsExtrasClient;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.biome.ColorResolver;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,7 +24,7 @@ public class AbstractMultiblockMixin {
     @Inject(at = @At("HEAD"), method = "getColor", cancellable = true, remap = true)
     private void overrideMultiblockBiome(BlockPos pos, ColorResolver color, CallbackInfoReturnable<Integer> cir) {
         if(FabricSeasonsExtrasClient.multiblockBiomeOverride != null) {
-            Optional<Biome> optional = world.getRegistryManager().get(Registry.BIOME_KEY).getOrEmpty(FabricSeasonsExtrasClient.multiblockBiomeOverride);
+            Optional<Biome> optional = world.getRegistryManager().get(RegistryKeys.BIOME).getOrEmpty(FabricSeasonsExtrasClient.multiblockBiomeOverride);
             optional.ifPresent(b -> cir.setReturnValue(color.getColor(b, pos.getX(), pos.getZ())));
         }
     }

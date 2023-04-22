@@ -43,9 +43,4 @@ public class SeasonalCompendiumItem extends Item {
         }
     }
 
-    @Override
-    public void appendStacks(ItemGroup group, DefaultedList<ItemStack> stacks) {
-        if(!FabricLoader.getInstance().isModLoaded("patchouli")) return;
-        super.appendStacks(group, stacks);
-    }
 }
