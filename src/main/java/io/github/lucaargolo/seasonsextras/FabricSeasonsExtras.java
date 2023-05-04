@@ -193,8 +193,8 @@ public class FabricSeasonsExtras implements ModInitializer {
                 Identifier cfId = server.getRegistryManager().get(Registry.CONFIGURED_FEATURE_KEY).getId(cf);
                 if(cfId != null) {
                     if (!multiblockCache.containsKey(cfId)) {
-                        PatchouliMultiblockCreator creator = new PatchouliMultiblockCreator(Blocks.GRASS_BLOCK.getDefaultState(), Blocks.GRASS.getDefaultState(), new BlockPos(-100, -100, -100), () -> {
-                            cf.generate(serverWorld, serverWorld.getChunkManager().getChunkGenerator(), Random.create(0L), new BlockPos(100, 100, 100));
+                        PatchouliMultiblockCreator creator = new PatchouliMultiblockCreator(serverWorld, Blocks.GRASS_BLOCK.getDefaultState(), Blocks.GRASS.getDefaultState(), new BlockPos(-100, -100, -100), (c) -> {
+                            cf.generate(c.getFakeWorld(), serverWorld.getChunkManager().getChunkGenerator(), Random.create(0L), new BlockPos(100, 100, 100));
                         });
                         Optional<JsonObject> optional = creator.getMultiblock((set) -> {
                             boolean foundLeave = false;
@@ -224,7 +224,7 @@ public class FabricSeasonsExtras implements ModInitializer {
             if(multiblockCache.containsKey(empty)) {
                 biomeToMultiblocks.computeIfAbsent(biomeId, b -> new HashSet<>(Collections.singleton(empty)));
             }else{
-                PatchouliMultiblockCreator creator = new PatchouliMultiblockCreator(Blocks.SAND.getDefaultState(), Blocks.DEAD_BUSH.getDefaultState(), new BlockPos(0, 0, 0), () -> {});
+                PatchouliMultiblockCreator creator = new PatchouliMultiblockCreator(serverWorld, Blocks.SAND.getDefaultState(), Blocks.DEAD_BUSH.getDefaultState(), new BlockPos(0, 0, 0), (c) -> {});
                 JsonObject emptyMultiblock = creator.getMultiblock((set) -> true).get();
                 multiblockCache.put(empty, emptyMultiblock);
                 biomeToMultiblocks.computeIfAbsent(biomeId, b -> new HashSet<>(Collections.singleton(empty)));
@@ -252,7 +252,13 @@ public class FabricSeasonsExtras implements ModInitializer {
         buf.writeInt(multiblockCache.size());
         multiblockCache.forEach((identifier, jsonObject) -> {
             buf.writeIdentifier(identifier);
-            buf.writeString(jsonObject.toString());
+            var string = jsonObject.toString();
+            if(string.length() > PacketByteBuf.DEFAULT_MAX_STRING_LENGTH) {
+                buf.writeString("{}");
+            }else{
+                buf.writeString(string);
+            };
+
         });
         if(player != null) {
             ServerPlayNetworking.send(player, SEND_MULTIBLOCKS_S2C, buf);
