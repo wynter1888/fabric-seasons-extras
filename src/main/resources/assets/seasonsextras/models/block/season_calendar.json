@@ -34,7 +34,7 @@
 			"from": [5.8, 5.1, 14.75],
 			"to": [10.2, 9.9, 14.75],
 			"faces": {
-				"north": {"uv": [0, 0, 16, 16], "texture": "#season"}
+				"north": {"uv": [0, 0, 11, 12], "texture": "#season"}
 			}
 		},
 		{

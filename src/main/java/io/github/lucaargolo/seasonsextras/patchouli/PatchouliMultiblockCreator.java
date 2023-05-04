@@ -2,8 +2,10 @@ package io.github.lucaargolo.seasonsextras.patchouli;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.github.lucaargolo.seasonsextras.utils.FakeStructureWorldAccess;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
@@ -14,8 +16,6 @@ import java.util.function.Predicate;
 
 public class PatchouliMultiblockCreator {
 
-    private static PatchouliMultiblockCreator testing = null;
-
     private static final char[] VALID_CHARS = {
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
@@ -23,21 +23,20 @@ public class PatchouliMultiblockCreator {
             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
     };
 
+    private final FakeStructureWorldAccess fakeWorld;
     private final HashMap<BlockPos, BlockState> testingMap;
-    private final Thread thread;
-
     private final BlockState ground;
 
     private final BlockState decoration;
 
     private final BlockPos offset;
-    private final Runnable generate;
+    private final Generator generate;
 
 
 
-    public PatchouliMultiblockCreator(BlockState ground, BlockState decoration, BlockPos offset, Runnable generate) {
+    public PatchouliMultiblockCreator(ServerWorld serverWorld, BlockState ground, BlockState decoration, BlockPos offset, Generator generate) {
+        this.fakeWorld = new FakeStructureWorldAccess(serverWorld, this);
         this.testingMap = new HashMap<>();
-        this.thread = Thread.currentThread();
         this.ground = ground;
         this.decoration = decoration;
         this.offset = offset;
@@ -58,9 +57,7 @@ public class PatchouliMultiblockCreator {
     }
 
     public Optional<JsonObject> getMultiblock(Predicate<Set<BlockState>> valid) {
-        testing = this;
-        try{ this.generate.run(); }catch (Exception ignored) { }
-        testing = null;
+        try{ this.generate.generate(this); }catch (Exception ignored) { }
         AtomicInteger index = new AtomicInteger();
         HashMap<BlockState, Character> mappings = new HashMap<>();
 
@@ -144,23 +141,22 @@ public class PatchouliMultiblockCreator {
         }
     }
 
-    public Thread getThread() {
-        return this.thread;
+    public FakeStructureWorldAccess getFakeWorld() {
+        return fakeWorld;
     }
 
     public BlockState getGround() {
         return this.ground;
     }
 
-    public static PatchouliMultiblockCreator getTesting() {
-        return testing;
-    }
-
     private static String stateToString(BlockState state) {
         return state.toString().replace("Block{", "").replace("}", "");
     }
 
-
+    @FunctionalInterface
+    public interface Generator {
+        void generate(PatchouliMultiblockCreator creator);
+    }
 
 
 
