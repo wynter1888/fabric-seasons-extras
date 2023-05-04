@@ -176,7 +176,7 @@ public class FabricSeasonsExtrasPatchouliCompat {
             JsonArray multiblocks = new JsonArray();
             FabricSeasonsExtrasClient.worldBiomeMultiblocks.getOrDefault(worldKey, new HashMap<>()).get(biomeId).forEach(treeId -> {
                 JsonObject multiblock = FabricSeasonsExtrasClient.multiblocks.get(treeId);
-                if (multiblock != null) {
+                if (multiblock != null && multiblock.size() > 0) {
                     multiblocks.add(multiblock);
                 }
             });

@@ -5,8 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "io.github.lucaargolo.seasonsextras.patchouli.PatchouliMixinConfigPlugin",
   "mixins": [
-    "ReloadContentsHandlerMixin",
-    "WorldMixin"
+    "ReloadContentsHandlerMixin"
   ],
   "client": [
     "AbstractMultiblockMixin",
