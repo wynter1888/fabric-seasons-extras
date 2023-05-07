@@ -138,8 +138,8 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
                 if (clientWorld == null) {
                     return 0f;
                 } else {
-                    long timeToNextSeason = (FabricSeasons.CONFIG.getSeasonLength() - (clientWorld.getTimeOfDay() - ((clientWorld.getTimeOfDay()/FabricSeasons.CONFIG.getSeasonLength())*FabricSeasons.CONFIG.getSeasonLength()) )) % FabricSeasons.CONFIG.getSeasonLength();
-                    double progressLeft = timeToNextSeason / (double) FabricSeasons.CONFIG.getSeasonLength();
+                    long timeToNextSeason = FabricSeasons.getTimeToNextSeason(clientWorld);
+                    double progressLeft = (double) timeToNextSeason / FabricSeasons.getCurrentSeason(clientWorld).getSeasonLength();
                     return (((int) (16.0 - (progressLeft*16.0))) % 16)/16f;
                 }
             }
