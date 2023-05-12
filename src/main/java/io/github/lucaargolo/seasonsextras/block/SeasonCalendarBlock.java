@@ -52,8 +52,8 @@ public class SeasonCalendarBlock extends BlockWithEntity {
 
     public BlockState getPlacementState(ItemPlacementContext ctx) {
         World world = ctx.getWorld();
-        long timeToNextSeason = (FabricSeasons.CONFIG.getSeasonLength() - (world.getTimeOfDay() - ((world.getTimeOfDay()/FabricSeasons.CONFIG.getSeasonLength())*FabricSeasons.CONFIG.getSeasonLength()) )) % FabricSeasons.CONFIG.getSeasonLength();
-        double progressLeft = timeToNextSeason / (double) FabricSeasons.CONFIG.getSeasonLength();
+        long timeToNextSeason = FabricSeasons.getTimeToNextSeason(world);
+        double progressLeft = (double) timeToNextSeason / FabricSeasons.getCurrentSeason(world).getSeasonLength();
         int currentProgress = Math.max(0, ((int) (16.0 - (progressLeft*16.0))) % 16);
         Season currentSeason = FabricSeasons.getCurrentSeason(world);
         Direction facing = ctx.getSide().getAxis() != Direction.Axis.Y ? ctx.getSide().getOpposite() : ctx.getHorizontalPlayerFacing();
@@ -76,8 +76,8 @@ public class SeasonCalendarBlock extends BlockWithEntity {
     }
 
     public static void updateState(BlockState state, World world, BlockPos pos) {
-        long timeToNextSeason = (FabricSeasons.CONFIG.getSeasonLength() - (world.getTimeOfDay() - ((world.getTimeOfDay()/FabricSeasons.CONFIG.getSeasonLength())*FabricSeasons.CONFIG.getSeasonLength()) )) % FabricSeasons.CONFIG.getSeasonLength();
-        double progressLeft = timeToNextSeason / (double) FabricSeasons.CONFIG.getSeasonLength();
+        long timeToNextSeason = FabricSeasons.getTimeToNextSeason(world);
+        double progressLeft = (double) timeToNextSeason / FabricSeasons.getCurrentSeason(world).getSeasonLength();
 
         int stateProgress = state.get(PROGRESS);
         int currentProgress = Math.max(0, ((int) (16.0 - (progressLeft*16.0))) % 16);

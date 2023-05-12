@@ -31,10 +31,9 @@ public class SeasonCalendarItem extends BlockItem {
 
     public static void appendCalendarTooltip(World world, List<Text> tooltip) {
         Season season = FabricSeasons.getCurrentSeason(world);
-        int seasonLength = FabricSeasons.CONFIG.getSeasonLength();
         tooltip.add(Text.translatable("tooltip.seasonsextras.calendar_info_1").formatted(season.getFormatting()).append(Text.translatable(season.getTranslationKey()).formatted(season.getFormatting())).formatted(Formatting.UNDERLINE));
         if(!FabricSeasons.CONFIG.isSeasonLocked() && !FabricSeasons.CONFIG.isSeasonTiedWithSystemTime())
-            tooltip.add(Text.literal(Long.toString(((seasonLength - (world.getTimeOfDay() - ((world.getTimeOfDay()/seasonLength)*seasonLength) )) % seasonLength)/24000L)).append(Text.translatable("tooltip.seasonsextras.calendar_info_2").formatted(Formatting.GRAY).append(Text.translatable("tooltip.seasons."+season.getNext().name().toLowerCase(Locale.ROOT)).formatted(season.getNext().getFormatting()))));
+            tooltip.add(Text.literal(Long.toString(FabricSeasons.getTimeToNextSeason(world)/24000L)).append(Text.translatable("tooltip.seasonsextras.calendar_info_2").formatted(Formatting.GRAY).append(Text.translatable("tooltip.seasons."+season.getNext().name().toLowerCase(Locale.ROOT)).formatted(season.getNext().getFormatting()))));
     }
 
 }
