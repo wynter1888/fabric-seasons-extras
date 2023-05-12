@@ -30,7 +30,7 @@
   "depends": {
     "fabricloader": ">=0.14.8",
     "fabric": ">=0.56.1",
-    "seasons": ">=2.0-BETA",
+    "seasons": ">=2.1-BETA",
     "minecraft": "1.19.x"
   },
   "custom": {
