@@ -1,23 +1,15 @@
 package io.github.lucaargolo.seasonsextras.client;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.github.lucaargolo.seasons.FabricSeasons;
-import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
 import io.github.lucaargolo.seasonsextras.block.GreenhouseGlassBlock;
 import io.github.lucaargolo.seasonsextras.client.screen.AirConditioningScreen;
-import io.github.lucaargolo.seasonsextras.patchouli.FabricSeasonsExtrasPatchouliCompat;
-import io.github.lucaargolo.seasonsextras.patchouli.mixin.GuiBookEntryAccessor;
 import io.github.lucaargolo.seasonsextras.utils.ModIdentifier;
-import io.github.lucaargolo.seasonsextras.utils.Tickable;
 import io.github.lucaargolo.seasonsextras.utils.TooltipRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
@@ -25,27 +17,16 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FabricSeasonsExtrasClient implements ClientModInitializer {
-
-    public static RegistryKey<Biome> multiblockBiomeOverride = null;
-    public static Season multiblockSeasonOverride = null;
-
-    public static final HashMap<RegistryKey<World>, Set<RegistryEntry<Biome>>> worldValidBiomes = new HashMap<>();
-    public static final HashMap<RegistryKey<World>, HashMap<Identifier, Set<Identifier>>> worldBiomeMultiblocks = new HashMap<>();
-    public static HashMap<Identifier, JsonObject> multiblocks = new HashMap<>();
 
     public static boolean prefersCelsius = true;
     public static final List<Text> testedTooltip = new ArrayList<>();
@@ -67,58 +48,13 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
                 testedTooltip.addAll(receivedTooltip);
             });
         });
-        ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_VALID_BIOMES_S2C, (client, handler, buf, responseSender) -> {
-            HashSet<Identifier> validBiomes = new HashSet<>();
-            Identifier worldId = buf.readIdentifier();
-            RegistryKey<World> worldKey = RegistryKey.of(RegistryKeys.WORLD, worldId);
-            int size = buf.readInt();
-            for(int i = 0; i < size; i++) {
-               validBiomes.add(buf.readIdentifier());
-            }
-            client.execute(() -> {
-                worldValidBiomes.computeIfPresent(worldKey, (key, list) -> new LinkedHashSet<>());
-                validBiomes.stream().sorted(Comparator.comparing(Identifier::getPath)).forEach(biome -> {
-                    handler.getRegistryManager().get(RegistryKeys.BIOME).getEntry(RegistryKey.of(RegistryKeys.BIOME, biome)).ifPresent(entry -> {
-                        worldValidBiomes.computeIfAbsent(worldKey, (key) -> new LinkedHashSet<>()).add(entry);
-                    });
-                });
-            });
-        });
-        ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_BIOME_MULTIBLOCKS_S2C, (client, handler, buf, responseSender) -> {
-            HashMap<Identifier, Set<Identifier>> biomeMultiblocks = new HashMap<>();
-            Identifier worldId = buf.readIdentifier();
-            RegistryKey<World> worldKey = RegistryKey.of(RegistryKeys.WORLD, worldId);
-            int mapSize = buf.readInt();
-            for(int m = 0; m < mapSize; m++) {
-                HashSet<Identifier> set = new HashSet<>();
-                Identifier biomeId = buf.readIdentifier();
-                int setSize = buf.readInt();
-                for(int s = 0; s < setSize; s++) {
-                    set.add(buf.readIdentifier());
-                }
-                biomeMultiblocks.put(biomeId, set);
-            }
-            client.execute(() -> {
-                worldBiomeMultiblocks.put(worldKey, biomeMultiblocks);
-            });
-        });
-        ClientPlayNetworking.registerGlobalReceiver(FabricSeasonsExtras.SEND_MULTIBLOCKS_S2C, (client, handler, buf, responseSender) -> {
-            HashMap<Identifier, JsonObject> serverMultiblocks = new HashMap<>();
-            int size = buf.readInt();
-            for(int m = 0; m < size; m++) {
-                serverMultiblocks.put(buf.readIdentifier(), JsonParser.parseString(buf.readString()).getAsJsonObject());
-            }
-            client.execute(() -> {
-                multiblocks = serverMultiblocks;
-            });
-        });
         ModelPredicateProviderRegistry.register(FabricSeasonsExtras.SEASON_CALENDAR_ITEM, new Identifier("season"), (itemStack, clientWorld, livingEntity, seed) -> {
             Entity entity = livingEntity != null ? livingEntity : itemStack.getHolder();
             if (entity == null) {
                 return 0.0F;
             } else {
-                if (clientWorld == null && entity.world instanceof ClientWorld) {
-                    clientWorld = (ClientWorld) entity.world;
+                if (clientWorld == null && entity.getWorld() instanceof ClientWorld) {
+                    clientWorld = (ClientWorld) entity.getWorld();
                 }
                 if(clientWorld == null) {
                     return 0f;
@@ -133,8 +69,8 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
             if (entity == null) {
                 return 0.0F;
             } else {
-                if (clientWorld == null && entity.world instanceof ClientWorld) {
-                    clientWorld = (ClientWorld) entity.world;
+                if (clientWorld == null && entity.getWorld() instanceof ClientWorld) {
+                    clientWorld = (ClientWorld) entity.getWorld();
                 }
                 if (clientWorld == null) {
                     return 0f;
@@ -150,28 +86,10 @@ public class FabricSeasonsExtrasClient implements ClientModInitializer {
             BlockRenderLayerMap.INSTANCE.putBlock(block, RenderLayer.getTranslucent());
         }
         BlockRenderLayerMap.INSTANCE.putBlock(Registries.BLOCK.get(new ModIdentifier("season_calendar")), RenderLayer.getCutout());
-        HudRenderCallback.EVENT.register(((matrixStack, tickDelta) -> {
+        HudRenderCallback.EVENT.register(((drawContext, tickDelta) -> {
             MinecraftClient client = MinecraftClient.getInstance();
-            TooltipRenderer.render(client, matrixStack, tickDelta);
+            TooltipRenderer.render(client, drawContext, tickDelta);
         }));
-        if(FabricLoader.getInstance().isModLoaded("patchouli")) {
-            FabricSeasonsExtrasPatchouliCompat.onInitializeClient();
-            ClientTickEvents.END_CLIENT_TICK.register(client -> {
-                if(client.currentScreen == null) {
-                    FabricSeasonsExtrasClient.multiblockBiomeOverride = null;
-                    FabricSeasonsExtrasClient.multiblockSeasonOverride = null;
-                }else{
-                    if(client.currentScreen instanceof GuiBookEntryAccessor bookEntry) {
-                        if(bookEntry.getLeftPage() instanceof Tickable page) {
-                            page.tick();
-                        }
-                        if(bookEntry.getRightPage() instanceof Tickable page) {
-                            page.tick();
-                        }
-                    }
-                }
-            });
-        }
     }
 
     //I don't know what this is but it kind of works

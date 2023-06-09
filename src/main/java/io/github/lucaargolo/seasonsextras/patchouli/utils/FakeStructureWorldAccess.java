@@ -1,4 +1,4 @@
-package io.github.lucaargolo.seasonsextras.utils;
+package io.github.lucaargolo.seasonsextras.patchouli.utils;
 
 import io.github.lucaargolo.seasonsextras.patchouli.PatchouliMultiblockCreator;
 import net.minecraft.block.Block;
@@ -314,7 +314,7 @@ public class FakeStructureWorldAccess implements StructureWorldAccess {
     @Nullable
     @Override
     public Chunk getChunk(int chunkX, int chunkZ, ChunkStatus leastStatus, boolean create) {
-        return new ReadOnlyChunk(this.serverWorld.getChunk(chunkX, chunkZ), false);
+        return new WrapperProtoChunk(this.serverWorld.getChunk(chunkX, chunkZ), false);
     }
 
     @Override

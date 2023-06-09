@@ -94,6 +94,14 @@ dependencies {
     modCompileOnly("vazkii.patchouli:Patchouli:${project["patchouli_version"]}")
 }
 
+sourceSets {
+    main {
+        java {
+            exclude("**io/github/lucaargolo/seasonsextras/patchouli**")
+        }
+    }
+}
+
 tasks.processResources {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 

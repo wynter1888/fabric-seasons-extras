@@ -104,7 +104,7 @@ public class AirConditioningBlock extends BlockWithEntity {
 
                     @Override
                     public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
-                        return new AirConditioningScreenHandler(syncId, inv, ScreenHandlerContext.create(player.world, pos), AirConditioningBlock.this, blockEntity.getInputInventory(), blockEntity.getModuleInventory(), blockEntity.getPropertyDelegate());
+                        return new AirConditioningScreenHandler(syncId, inv, ScreenHandlerContext.create(player.getWorld(), pos), AirConditioningBlock.this, blockEntity.getInputInventory(), blockEntity.getModuleInventory(), blockEntity.getPropertyDelegate());
                     }
                 });
                 return ActionResult.CONSUME;

@@ -1,6 +1,6 @@
 package io.github.lucaargolo.seasonsextras.patchouli.page;
 
-import io.github.lucaargolo.seasonsextras.client.FabricSeasonsExtrasClient;
+import io.github.lucaargolo.seasonsextras.patchouli.FabricSeasonsExtrasPatchouliCompatClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.registry.RegistryKey;
@@ -25,7 +25,7 @@ public class PageBiomeSearch extends PageSearch {
         ClientWorld world = client.world;
         if(world != null) {
             RegistryKey<World> worldKey = world.getRegistryKey();
-            FabricSeasonsExtrasClient.worldValidBiomes.getOrDefault(worldKey, new HashSet<>()).forEach(entry -> {
+            FabricSeasonsExtrasPatchouliCompatClient.worldValidBiomes.getOrDefault(worldKey, new HashSet<>()).forEach(entry -> {
                 entry.getKey().ifPresent(key -> {
                     Identifier id = key.getValue();
                     String name = Text.translatable(id.toTranslationKey("biome")).getString();

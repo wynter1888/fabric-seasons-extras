@@ -1,20 +1,17 @@
 package io.github.lucaargolo.seasonsextras.client.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.lucaargolo.seasons.FabricSeasons;
 import io.github.lucaargolo.seasons.utils.Season;
 import io.github.lucaargolo.seasonsextras.FabricSeasonsExtras;
-import io.github.lucaargolo.seasonsextras.blockentities.AirConditioningBlockEntity;
 import io.github.lucaargolo.seasonsextras.blockentities.AirConditioningBlockEntity.*;
 import io.github.lucaargolo.seasonsextras.screenhandlers.AirConditioningScreenHandler;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.sound.SoundEvents;
@@ -38,22 +35,20 @@ public class AirConditioningScreen extends HandledScreen<AirConditioningScreenHa
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderBackground(matrices);
-        super.render(matrices, mouseX, mouseY, delta);
-        drawMouseoverTooltip(matrices, mouseX, mouseY);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        this.renderBackground(context);
+        super.render(context, mouseX, mouseY, delta);
+        drawMouseoverTooltip(context, mouseX, mouseY);
     }
 
     @Override
-    protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
-        RenderSystem.setShaderTexture(0, handler.getConditioning().getTexture());
-        this.drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
+    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+        context.drawTexture(handler.getConditioning().getTexture(), x, y, 0, 0, backgroundWidth, backgroundHeight);
     }
 
     @Override
-    protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
+    protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
         float delta = MinecraftClient.getInstance().getTickDelta();
-        RenderSystem.setShaderTexture(0, handler.getConditioning().getTexture());
         BurnSlot[] burnSlots = handler.getBurnSlots();
 
         float lerpProgress = MathHelper.lerp(delta, lastProgress, handler.getProgress());
@@ -61,7 +56,7 @@ public class AirConditioningScreen extends HandledScreen<AirConditioningScreenHa
         int progress = MathHelper.floor(lerpProgress);
 
         int maxProgress = AirConditioningScreenHandler.getMaxProgress(burnSlots);
-        this.drawTexture(matrices, 79, 42, 176, 28, Math.min(progress, maxProgress-13), 29);
+        context.drawTexture(handler.getConditioning().getTexture(), 79, 42, 176, 28, Math.min(progress, maxProgress-13), 29);
         List<OrderedText> tooltip = new ArrayList<>();
         boolean sneak = InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), MinecraftClient.getInstance().options.sneakKey.boundKey.getCode());
         for(int i = 0; i < burnSlots.length; i++) {
@@ -70,11 +65,11 @@ public class AirConditioningScreen extends HandledScreen<AirConditioningScreenHa
             int burnSlotY = y+59;
             //Draw item transfer progress
             int moduleProgress = Math.min(Math.max(0, progress - (28 + (18*i))), burnSlot.enabled && !burnSlot.full ? 13 : 0);
-            this.drawTexture(matrices, 102+(18*i), 54+(13-moduleProgress), 176, 57+(13-moduleProgress), 7, moduleProgress);
+            context.drawTexture(handler.getConditioning().getTexture(), 102+(18*i), 54+(13-moduleProgress), 176, 57+(13-moduleProgress), 7, moduleProgress);
             //Draw burn slot state
-            this.drawTexture(matrices, 102+(18*i), 59, burnSlot.enabled ? 176 : 183,  pressedTime[i] == 0 ? 14 : 21, 7, 7);
+            context.drawTexture(handler.getConditioning().getTexture(), 102+(18*i), 59, burnSlot.enabled ? 176 : 183,  pressedTime[i] == 0 ? 14 : 21, 7, 7);
             if(mouseX >= burnSlotX && mouseX < burnSlotX+7 && mouseY >= burnSlotY && mouseY < burnSlotY+7) {
-                this.fillGradient(matrices, burnSlotX-x, burnSlotY-y, burnSlotX-x+7, burnSlotY-y+7, -2130706433, -2130706433);
+                context.fillGradient(burnSlotX-x, burnSlotY-y, burnSlotX-x+7, burnSlotY-y+7, -2130706433, -2130706433);
                 tooltip.add(Text.translatable("screen.seasonsextras."+(burnSlot.enabled ? "close" : "open")+"_valve").formatted(burnSlot.enabled ? Formatting.RED : Formatting.GREEN).asOrderedText());
                 if(!sneak) {
                     tooltip.add(Text.translatable("tooltip.seasons.show_more", Text.translatable(MinecraftClient.getInstance().options.sneakKey.getBoundKeyTranslationKey()).formatted(Formatting.BLUE)).formatted(Formatting.GRAY).asOrderedText());
@@ -87,15 +82,15 @@ public class AirConditioningScreen extends HandledScreen<AirConditioningScreenHa
             float lerpSlotProgress = MathHelper.lerp(delta, lastBurnProgress[i], slotProgress);
             lastBurnProgress[i] = slotProgress;
             int burnProgress = MathHelper.floor(lerpSlotProgress);
-            this.drawTexture(matrices, 98+(18*i), 18+(13-burnProgress), 176, 13-burnProgress, 13, burnProgress);
+            context.drawTexture(handler.getConditioning().getTexture(), 98+(18*i), 18+(13-burnProgress), 176, 13-burnProgress, 13, burnProgress);
         }
-        this.drawTexture(matrices, 163, 6, handler.hasParticles() ? 190 : 197,  pressedTime[burnSlots.length] == 0 ? 14 : 21, 7, 7);
+        context.drawTexture(handler.getConditioning().getTexture(), 163, 6, handler.hasParticles() ? 190 : 197,  pressedTime[burnSlots.length] == 0 ? 14 : 21, 7, 7);
         if(mouseX >= x+163 && mouseX < x+163+7 && mouseY >= y+6 && mouseY < y+6+7) {
-            this.fillGradient(matrices, 163, 6, 163+7, 6+7, -2130706433, -2130706433);
+            context.fillGradient(163, 6, 163+7, 6+7, -2130706433, -2130706433);
             tooltip.add(Text.translatable("screen.seasonsextras."+(handler.hasParticles() ? "disable" : "enable")+"_particles").formatted(handler.hasParticles() ? Formatting.GRAY : Formatting.YELLOW).asOrderedText());
         }
         if(mouseX >= x+97 && mouseX < x+97+54 && mouseY >= y+16 && mouseY < y+16+18) {
-            this.fillGradient(matrices, 97, 16, 97+54, 16+18, -2130706433, -2130706433);
+            context.fillGradient(97, 16, 97+54, 16+18, -2130706433, -2130706433);
             int level = handler.getLevel();
             Season worldSeason = FabricSeasons.getCurrentSeason();
             Season conditionedSeason = handler.getConditioning().getConditioned(worldSeason, level);
@@ -109,9 +104,9 @@ public class AirConditioningScreen extends HandledScreen<AirConditioningScreenHa
             tooltip.add(Text.translatable(worldSeason.getTranslationKey()).formatted(worldSeason.getFormatting()).append(Text.literal(" -> ").formatted(Formatting.GRAY)).append(Text.translatable(conditionedSeason.getTranslationKey()).formatted(conditionedSeason.getFormatting())).asOrderedText());
         }
         if(!tooltip.isEmpty()) {
-            this.renderOrderedTooltip(matrices, tooltip, mouseX-x, mouseY-y);
+            context.drawOrderedTooltip(textRenderer, tooltip, mouseX-x, mouseY-y);
         }
-        super.drawForeground(matrices, mouseX, mouseY);
+        super.drawForeground(context, mouseX, mouseY);
     }
 
     @Override

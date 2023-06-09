@@ -3,7 +3,7 @@ package io.github.lucaargolo.seasonsextras.patchouli.page;
 import com.google.gson.annotations.SerializedName;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.lucaargolo.seasons.utils.Season;
-import io.github.lucaargolo.seasonsextras.client.FabricSeasonsExtrasClient;
+import io.github.lucaargolo.seasonsextras.patchouli.FabricSeasonsExtrasPatchouliCompatClient;
 import io.github.lucaargolo.seasonsextras.patchouli.mixin.PageMultiblockAccessor;
 import io.github.lucaargolo.seasonsextras.utils.Tickable;
 import net.minecraft.client.MinecraftClient;
@@ -59,13 +59,13 @@ public class PageSeasonalBiome extends PageMultiblock implements Tickable {
             }
         }
 
-        FabricSeasonsExtrasClient.multiblockSeasonOverride = selectedSeason;
+        FabricSeasonsExtrasPatchouliCompatClient.multiblockSeasonOverride = selectedSeason;
         if(biomeId != null) {
-            FabricSeasonsExtrasClient.multiblockBiomeOverride = RegistryKey.of(RegistryKeys.BIOME, biomeId);
+            FabricSeasonsExtrasPatchouliCompatClient.multiblockBiomeOverride = RegistryKey.of(RegistryKeys.BIOME, biomeId);
         }
         super.render(ms, mouseX, mouseY, pticks);
-        FabricSeasonsExtrasClient.multiblockBiomeOverride = null;
-        FabricSeasonsExtrasClient.multiblockSeasonOverride = null;
+        FabricSeasonsExtrasPatchouliCompatClient.multiblockBiomeOverride = null;
+        FabricSeasonsExtrasPatchouliCompatClient.multiblockSeasonOverride = null;
         RenderSystem.setShaderTexture(0, parent.getBookTexture());
         DrawableHelper.drawTexture(ms, 6, 115, 23, 23, 352, selectedSeason == Season.SPRING ? 0 : 28, 28, 28, 512, 256);
         DrawableHelper.drawTexture(ms, 33, 115, 23, 23, 380, selectedSeason == Season.SUMMER ? 0 : 28, 28, 28, 512, 256);

@@ -1,4 +1,4 @@
-package io.github.lucaargolo.seasonsextras.utils;
+package io.github.lucaargolo.seasonsextras.patchouli.utils;
 
 import net.minecraft.client.font.FontStorage;
 import net.minecraft.client.font.TextRenderer;

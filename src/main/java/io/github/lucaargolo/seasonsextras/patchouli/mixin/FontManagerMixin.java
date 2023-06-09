@@ -1,7 +1,7 @@
 package io.github.lucaargolo.seasonsextras.patchouli.mixin;
 
 import io.github.lucaargolo.seasonsextras.patchouli.mixed.FontManagerMixed;
-import io.github.lucaargolo.seasonsextras.utils.StyledTextRenderer;
+import io.github.lucaargolo.seasonsextras.patchouli.utils.StyledTextRenderer;
 import net.minecraft.client.font.FontManager;
 import net.minecraft.client.font.FontStorage;
 import net.minecraft.client.font.TextRenderer;

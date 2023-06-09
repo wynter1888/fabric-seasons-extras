@@ -2,7 +2,7 @@ package io.github.lucaargolo.seasonsextras.patchouli.mixin;
 
 import io.github.lucaargolo.seasons.FabricSeasons;
 import io.github.lucaargolo.seasons.utils.Season;
-import io.github.lucaargolo.seasonsextras.client.FabricSeasonsExtrasClient;
+import io.github.lucaargolo.seasonsextras.patchouli.FabricSeasonsExtrasPatchouliCompatClient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,8 +13,8 @@ public class FabricSeasonsMixin {
 
     @Inject(at = @At("HEAD"), method = "getCurrentSeason()Lio/github/lucaargolo/seasons/utils/Season;", cancellable = true)
     private static void injectMultiblockSeason(CallbackInfoReturnable<Season> cir) {
-        if(FabricSeasonsExtrasClient.multiblockSeasonOverride != null) {
-            cir.setReturnValue(FabricSeasonsExtrasClient.multiblockSeasonOverride);
+        if(FabricSeasonsExtrasPatchouliCompatClient.multiblockSeasonOverride != null) {
+            cir.setReturnValue(FabricSeasonsExtrasPatchouliCompatClient.multiblockSeasonOverride);
         }
     }
 

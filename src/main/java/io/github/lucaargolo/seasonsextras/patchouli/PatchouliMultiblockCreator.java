@@ -2,7 +2,7 @@ package io.github.lucaargolo.seasonsextras.patchouli;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import io.github.lucaargolo.seasonsextras.utils.FakeStructureWorldAccess;
+import io.github.lucaargolo.seasonsextras.patchouli.utils.FakeStructureWorldAccess;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.server.world.ServerWorld;
