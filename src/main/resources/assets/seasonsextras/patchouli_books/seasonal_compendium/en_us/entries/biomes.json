@@ -1,0 +1,22 @@
+{
+  "name": "patchouli.seasonsextras.biomes",
+  "category": "seasonsextras:compendium",
+  "icon": "minecraft:oak_leaves",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "title": "patchouli.seasonsextras.biomes",
+      "text": "patchouli.seasonsextras.biomes_text"
+    },
+    {
+      "type": "seasonsextras:biome_search",
+      "title": "patchouli.seasonsextras.entries"
+    },
+    {
+      "type": "seasonsextras:modifiable",
+      "modify": "seasonsextras:seasonal_biomes"
+    }
+  ],
+  "read_by_default": true,
+  "sortnum": 0
+}
