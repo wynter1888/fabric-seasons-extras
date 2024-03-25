@@ -11,5 +11,6 @@
   "version": 1,
   "nameplate_color": "64D637",
   "link_color": "579A20",
-  "link_hover_color": "5BBB26"
+  "link_hover_color": "5BBB26",
+  "use_resource_pack": true
 }
